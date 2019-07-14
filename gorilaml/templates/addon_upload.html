@@ -29,7 +29,7 @@
             <h3 class="card-title">Upload your plugin</h3>
         </div>
         <div class="card-body">
-            <form id="form_addon_upload" role="form" method="POST" enctype="multipart/form-data" action="{{ url_for('upload_file') }}">
+            <form id="form_addon_upload" role="form" method="POST" enctype="multipart/form-data" action="{{ request.url }}">
                 <div class="form-group">
                     <label for="addon-file-input">Choose your addon file</label>
                     <div class="input-group">

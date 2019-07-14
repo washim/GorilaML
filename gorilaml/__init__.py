@@ -41,7 +41,7 @@ def create_app():
 
     @app.route('/addon-upload', methods=['GET', 'POST'])
     @authorize
-    def upload_file():
+    def addon_upload():
         if request.method == 'POST':
             if 'addon-file-name' not in request.files:
                 flash('No file part','error')
@@ -55,28 +55,43 @@ def create_app():
             
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
+                user_folder = os.path.join(UPLOAD_FOLDER, session['username'])
                 
-                if os.path.isdir(os.path.join(UPLOAD_FOLDER, session['username'])) == False:
-                    os.mkdir(os.path.join(UPLOAD_FOLDER, session['username']))
+                if os.path.isdir(user_folder) == False:
+                    os.mkdir(user_folder)
                 
-                file_path = os.path.join(UPLOAD_FOLDER, session['username'], filename)
-                file.save(file_path)
+                file_path = os.path.join(user_folder, filename)
+                parse_file_name = filename.split('.')
                 
-                if os.path.exists(file_path):
+                if os.path.isdir(os.path.join(user_folder, parse_file_name[0])) == False and len(parse_file_name) == 2:
+                    file.save(file_path)
                     with ZipFile(file_path, 'r') as zip:
-                        zip.extractall(os.path.join(UPLOAD_FOLDER, session['username']))
+                        zip.extractall(user_folder)
                     
                     os.remove(file_path)
+
+                    if os.path.isdir(os.path.join(user_folder, parse_file_name[0])) == False:
+                        flash('Plugin folder name insize zip file should be same as zip file name.','error')
+                        return redirect(request.url)
+                    else:
+                        try:
+                            db.insert_db('plugins', ('author_id', 'name', 'status'), (session['user_id'], parse_file_name[0], 1))
+                        except:
+                            flash('Plugin already exist. It should be unique for each upload.','error')
+                            return redirect(request.url)
+                    
+                    fp = open('gorilaml/reloader.py', 'w+')
+                    fp.write("last_reloaded='%s'" % time.time())
+                    fp.close()
+                    flash('Your plugin successfully installed.', 'success')
+                    
+                    return redirect(
+                        url_for('addon_upload', token=base64.b64encode((session['username']+':'+session['password']).encode()))
+                    )
                 
-                flash('Your addon successfully installed.','success')
-                
-                fp = open('gorilaml/reloader.py', 'w+')
-                fp.write("last_reloaded='%s'" % time.time())
-                fp.close()
-                
-                return redirect(
-                    url_for('upload_file', token=base64.b64encode((session['username']+':'+session['password']).encode()))
-                )
+                else:
+                    flash('Plugins already exist. It should be unique for each upload.','error')
+                    return redirect(request.url)
             
             else:
                 flash('Please select valid file.','error')
@@ -111,11 +126,12 @@ def create_app():
         if request.method == 'POST':
             getuser = db.query_db('SELECT * FROM user WHERE username=? and password=?', (request.form['username'], request.form['password']), True)
             if getuser:
+                session['user_id'] = getuser['id']
                 session['username'] = getuser['username']
                 session['password'] = getuser['password']
                 flash('Welcome back, you are authenticated successfully.','success')
                 return redirect(
-                    url_for('home', token=base64.b64encode((session['username']+':'+session['password']).encode()))
+                    url_for('plugins', token=base64.b64encode((session['username']+':'+session['password']).encode()))
                 )
             else:
                 flash('Login failed. Please try again.','error')

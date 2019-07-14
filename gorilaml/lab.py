@@ -19,6 +19,7 @@ def authorize(fun):
                     flash('Login expired. Please login again.','error')
                     return redirect(url_for('login'))
                 else:
+                    session['user_id'] = getuser['id']
                     session['username'] = getuser['username']
                     session['password'] = getuser['password']
                     return fun(*args, **kws)
