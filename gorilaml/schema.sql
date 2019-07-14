@@ -7,7 +7,7 @@ CREATE TABLE user (
   password TEXT NOT NULL
 );
 
-CREATE TABLE addons (
+CREATE TABLE plugins (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   author_id INTEGER NOT NULL,
   name VARCHAR(100) NOT NULL,
@@ -15,3 +15,6 @@ CREATE TABLE addons (
   created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (author_id) REFERENCES user (id)
 );
+
+INSERT INTO `user` (username, password)
+VALUES ('admin','admin');

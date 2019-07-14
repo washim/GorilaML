@@ -1,5 +1,8 @@
-import os, time, base64
-from gorilaml.lab import contribaddons, authorize
+import os
+import time
+import base64
+import sys
+from gorilaml.lab import getplugins, authorize
 from gorilaml import db
 from gorilaml.reloader import last_reloaded
 from flask import (
@@ -16,18 +19,20 @@ def create_app():
         SECRET_KEY=os.urandom(12),
         DATABASE=os.path.join(app.instance_path, 'gorilaml.sqlite'),
     )
+    
     CORS(app)
     UPLOAD_FOLDER = os.path.join(app.instance_path, 'addons')
     ALLOWED_EXTENSIONS = set(['zip'])
-    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     
     if 'GORILAML_SETTINGS' in os.environ:
         app.config.from_pyfile(os.environ['GORILAML_SETTINGS'])
-    
-    try:
+
+    if os.path.isdir(app.instance_path) == False:
         os.mkdir(app.instance_path)
-    except:
-        pass
+        sys.path.append(app.instance_path)
+    
+    if os.path.isdir(UPLOAD_FOLDER) == False:
+        os.mkdir(UPLOAD_FOLDER)
     
     db.init_app(app)
 
@@ -50,12 +55,16 @@ def create_app():
             
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], session['username'], filename)
+                
+                if os.path.isdir(os.path.join(UPLOAD_FOLDER, session['username'])) == False:
+                    os.mkdir(os.path.join(UPLOAD_FOLDER, session['username']))
+                
+                file_path = os.path.join(UPLOAD_FOLDER, session['username'], filename)
                 file.save(file_path)
                 
                 if os.path.exists(file_path):
                     with ZipFile(file_path, 'r') as zip:
-                        zip.extractall(os.path.join(app.config['UPLOAD_FOLDER'], session['username']))
+                        zip.extractall(os.path.join(UPLOAD_FOLDER, session['username']))
                     
                     os.remove(file_path)
                 
@@ -91,10 +100,11 @@ def create_app():
     def myaccount():
         return 'inprogress'
 
-    @app.route('/addons')
+    @app.route('/plugins')
     @authorize
-    def addons():
-        return 'inprogress'
+    def plugins():
+        results = db.get_data('plugins')
+        return render_template('plugins.html', plugins=results)
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
@@ -113,13 +123,13 @@ def create_app():
         
         return render_template('login.html')
     
-    with app.app_context():
-        allAddons = db.query_db('SELECT * FROM addons WHERE status=? and author_id=?', (1, 1))
-    
-    for addon in contribaddons(app.instance_path, allAddons).getAddons().values():
-        try:
-            app.register_blueprint(addon)
-        except:
-            pass
+    try:
+        for addon in getplugins(app):
+            try:
+                app.register_blueprint(addon)
+            except:
+                pass
+    except:
+        pass
 
     return app

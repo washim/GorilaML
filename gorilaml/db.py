@@ -31,6 +31,20 @@ def query_db(query, args=(), one=False):
     
     return rv
 
+def get_data(table, where_fields=(), where_values=(), one=False):
+    db = get_db()
+    query = 'SELECT * FROM %s' % table
+    if len(where_fields) > 0:
+        query += ' WHERE %s' % (' and '.join(['%s=?' % where_field for where_field in where_fields]))
+    cur = db.execute(query, where_values)
+    if one:
+        rv = cur.fetchone()
+    else:
+        rv = cur.fetchall()
+    cur.close()
+
+    return rv
+
 def insert_db(table, fields=(), values=()):
     db = get_db()
     query = 'INSERT INTO %s (%s) VALUES (%s)' % (

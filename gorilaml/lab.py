@@ -1,6 +1,7 @@
 import importlib
 import sys
 import base64
+import os
 from functools import wraps
 from flask import (
     session, flash, redirect, url_for, request, g
@@ -29,19 +30,16 @@ def authorize(fun):
         
     return wrapper
 
-class contribaddons:
-    def __init__(self, instance, alladdons):
-        self.instance = instance
-        self.alladdons = alladdons
-        sys.path.append(self.instance)
+def getplugins(app):
+    with app.app_context():
+        allplugins = db.query_db('SELECT t1.*,t2.username FROM plugins t1 join user t2 ON t1.author_id=t2.id WHERE t1.status=1')
     
-    def getAddons(self):
-        addons = {}
-        for addon in self.alladdons:
-            try:
-                addons_libs = importlib.import_module('addons.%s.%s.api' % ('admin',addon['name']))
-                addons[addon['name']] = getattr(addons_libs, 'gorilaml')
-            except:
-                pass
+    plugin_dict = {}
+    for plugin in allplugins:
+        try:
+            plugin_libs = importlib.import_module('addons.%s.%s.api' % (addon['username'], addon['name']))
+            plugin_dict[plugin['name']] = getattr(plugin_libs, 'gorilaml')
+        except:
+            pass
 
-        return addons
+    return plugin_dict
