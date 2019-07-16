@@ -7,7 +7,7 @@
             <h3 class="card-title">Register your plugin from your local machine</h3>
         </div>
         <div class="card-body">
-            <form id="form_register_plugin" role="form" method="POST" action="#">
+            <form id="form_register_plugin" role="form" method="POST" action="{{ request.url }}">
                 <div class="form-group">
                     <label>Local plugin path</label>
                     <input name="local_plugin_path" type="text" class="form-control" placeholder="Enter valid plugin path">

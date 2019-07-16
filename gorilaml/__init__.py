@@ -2,7 +2,8 @@ import os
 import time
 import base64
 import sys
-from gorilaml.lab import getplugins, authorize
+import importlib
+from gorilaml.lab import authorize
 from gorilaml import db
 from gorilaml.reloader import last_reloaded
 from flask import (
@@ -29,11 +30,11 @@ def create_app():
 
     if os.path.isdir(app.instance_path) == False:
         os.mkdir(app.instance_path)
-        sys.path.append(app.instance_path)
     
     if os.path.isdir(UPLOAD_FOLDER) == False:
         os.mkdir(UPLOAD_FOLDER)
     
+    sys.path.append(app.instance_path)
     db.init_app(app)
 
     def allowed_file(filename):
@@ -99,6 +100,39 @@ def create_app():
         
         return render_template('addon_upload.html')
     
+    @app.route('/register-local', methods=['GET', 'POST'])
+    @authorize
+    def register_local():
+        if request.method == 'POST':
+            if 'local_plugin_path' in request.form and 'local_plugin_name' in request.form:
+                if os.path.isdir(request.form['local_plugin_path']):
+                    if os.path.isdir(os.path.join(request.form['local_plugin_path'], request.form['local_plugin_name'])):
+                        try:
+                            db.insert_db('plugins', ('author_id', 'name', 'plugin_path', 'status'), (session['user_id'], request.form['local_plugin_name'], request.form['local_plugin_path'], 1))
+                        except:
+                            flash('Plugin already exist. It should be unique for each upload.','error')
+                            return redirect(request.url)
+
+                        fp = open('gorilaml/reloader.py', 'w+')
+                        fp.write("last_reloaded='%s'" % time.time())
+                        fp.close()
+                        flash('Your plugin successfully installed.', 'success')
+
+                        return redirect(
+                            url_for('register_local', token=base64.b64encode((session['username']+':'+session['password']).encode()))
+                        )
+                    else:
+                        flash('Plugin does not exist inside your plugin path.','error')
+                        return redirect(request.url)
+                else:
+                    flash('Plugin path does not exist','error')
+                    return redirect(request.url)
+            else:
+                flash('All fields are required.','error')
+                return redirect(request.url)
+        
+        return render_template('addon_upload.html')
+
     @app.route('/')
     @authorize
     def home():
@@ -140,9 +174,22 @@ def create_app():
         return render_template('login.html')
     
     try:
-        for addon in getplugins(app):
+        with app.app_context():
+            allplugins = db.query_db('SELECT t1.*,t2.username FROM plugins t1 join user t2 ON t1.author_id=t2.id WHERE t1.status=1')
+        
+        for plugin in allplugins:
             try:
-                app.register_blueprint(addon)
+                if plugin['plugin_path'] == 'system':
+                    plugin_libs = importlib.import_module('addons.%s.%s.api' % (plugin['username'], plugin['name']))
+                    bp = getattr(plugin_libs, 'gorilaml')
+                    app.register_blueprint(bp)
+                else:
+                    if plugin['plugin_path'] not in sys.path:
+                        sys.path.append(plugin['plugin_path'])
+                    
+                    plugin_libs = importlib.import_module('%s.api' % plugin['name'])
+                    bp = getattr(plugin_libs, 'gorilaml')
+                    app.register_blueprint(bp)
             except:
                 pass
     except:
