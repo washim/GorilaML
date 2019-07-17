@@ -2,10 +2,10 @@ import os
 import time
 import sys
 import importlib
-from gorilaml.lab import authorize, securetoken, reload
-from gorilaml import db
-from gorilaml.reloader import last_reloaded
-from gorilaml.form import csrf, PluginUploadForm, RegisterLocalPluginForm
+from gorillaml.lab import authorize, securetoken, reload
+from gorillaml import db
+from gorillaml.reloader import last_reloaded
+from gorillaml.form import csrf, PluginUploadForm, RegisterLocalPluginForm
 from flask import (
     Flask, Blueprint, render_template, jsonify, request, flash, redirect, url_for, session
 )

@@ -1,0 +1,11 @@
+Metadata-Version: 1.2
+Name: gorillaml
+Version: dev-1.0.0
+Summary: UNKNOWN
+Home-page: UNKNOWN
+Author: Washim Ahmed
+Author-email: washim.ahmed@gmail.com
+License: Creative Commons Attribution-Noncommercial-Share Alike license
+Description: GorilaML model management system
+Platform: UNKNOWN
+Requires-Python: >=3

@@ -5,7 +5,7 @@ from functools import wraps
 from flask import (
     session, flash, redirect, url_for, request
 )
-from gorilaml import db
+from gorillaml import db
 
 def authorize(fun):
     @wraps(fun)
