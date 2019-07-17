@@ -22,10 +22,10 @@
                     <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="#" class="nav-link">Home</a>
+                    <a href="/" class="nav-link">Home</a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="#" class="nav-link">Contact</a>
+                    <a href="{{ url_for('plugins') }}" class="nav-link">Plugins</a>
                 </li>
             </ul>
 
@@ -55,9 +55,9 @@
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-light-primary elevation-4">
             <!-- Brand Logo -->
-            <a href="index3.html" class="brand-link">
-                <img src="/static/resources/64x64.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3">
-                <span class="brand-text font-weight-light">GorilaML Services</span>
+            <a href="/" class="brand-link">
+                <img src="{{ url_for('static', filename='resources/64x64.png') }}" class="brand-image img-circle elevation-3">
+                <span class="brand-text font-weight-light"><b>GorillaML</b></span>
             </a>
 
             <!-- Sidebar -->
@@ -65,10 +65,10 @@
                 <!-- Sidebar user panel (optional) -->
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                     <div class="image">
-                        <img src="/static/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
+                        <img src="{{ url_for('static', filename='img/avatar04.png') }}" class="img-circle elevation-2" alt="User Image">
                     </div>
                     <div class="info">
-                        <a href="#" class="d-block">Alexander Pierce</a>
+                        <a href="#" class="d-block">{{ username }}</a>
                     </div>
                 </div>
 
@@ -77,12 +77,27 @@
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <li class="nav-item has-treeview menu-open">
                             <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-tachometer-alt"></i> <p>Dashboard<i class="right fas fa-angle-left"></i></p>
+                                <i class="nav-icon fas fa-th"></i> <p>Dashboard<i class="right fas fa-angle-left"></i></p>
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i> <p>Dashboard v1</p>
+                                    <a href="/" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i> <p>Home</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url_for('plugins') }}" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i> <p>Plugins</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url_for('plugin_upload') }}" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i> <p>Plugin Upload</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url_for('register_local') }}" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i> <p>Local Plugin Register</p>
                                     </a>
                                 </li>
                             </ul>

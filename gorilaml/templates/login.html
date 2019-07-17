@@ -14,7 +14,7 @@
 <body class="hold-transition login-page">
   <div class="login-box">
     <div class="login-logo">
-      <a href="#"><img src="{{ url_for('static', filename='resources/64x64.png') }}"><b>Gorila</b>ML</a>
+      <a href="#"><img src="{{ url_for('static', filename='resources/64x64.png') }}"><b>Gorilla</b>ML</a>
     </div>
     <div class="card">
       <div class="card-body login-card-body">
@@ -46,6 +46,7 @@
         {% endwith %}
         <p class="login-box-msg">Sign in to start your session</p>
         <form action="{{ url_for('login') }}" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="input-group mb-3">
             <input type="username" name="username" class="form-control" placeholder="Username">
             <div class="input-group-append input-group-text">

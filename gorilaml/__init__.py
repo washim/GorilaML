@@ -1,11 +1,11 @@
 import os
 import time
-import base64
 import sys
 import importlib
-from gorilaml.lab import authorize
+from gorilaml.lab import authorize, securetoken, reload
 from gorilaml import db
 from gorilaml.reloader import last_reloaded
+from gorilaml.form import csrf, PluginUploadForm, RegisterLocalPluginForm
 from flask import (
     Flask, Blueprint, render_template, jsonify, request, flash, redirect, url_for, session
 )
@@ -18,12 +18,13 @@ def create_app():
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY=os.urandom(12),
-        DATABASE=os.path.join(app.instance_path, 'gorilaml.sqlite'),
+        DATABASE=os.path.join(app.instance_path, '%s.sqlite' % __name__),
+        PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons')
     )
-    
+
     CORS(app)
-    UPLOAD_FOLDER = os.path.join(app.instance_path, 'addons')
-    ALLOWED_EXTENSIONS = set(['zip'])
+    csrf.init_app(app)
+    db.init_app(app)
     
     if 'GORILAML_SETTINGS' in os.environ:
         app.config.from_pyfile(os.environ['GORILAML_SETTINGS'])
@@ -31,107 +32,53 @@ def create_app():
     if os.path.isdir(app.instance_path) == False:
         os.mkdir(app.instance_path)
     
-    if os.path.isdir(UPLOAD_FOLDER) == False:
-        os.mkdir(UPLOAD_FOLDER)
+    if os.path.isdir(app.config['PLUGIN_UPLOAD_FOLDER']) == False:
+        os.mkdir(app.config['PLUGIN_UPLOAD_FOLDER'])
     
     sys.path.append(app.instance_path)
-    db.init_app(app)
 
-    def allowed_file(filename):
-        return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-    @app.route('/addon-upload', methods=['GET', 'POST'])
+    @app.route('/plugin-upload', methods=['GET', 'POST'])
     @authorize
-    def addon_upload():
-        if request.method == 'POST':
-            if 'addon-file-name' not in request.files:
-                flash('No file part','error')
-                return redirect(request.url)
+    def plugin_upload():
+        plugin = PluginUploadForm()
+        if plugin.validate_on_submit():
+            filename = secure_filename(plugin.upload.data.filename)
+            parse_file_name = filename.split('.')
             
-            file = request.files['addon-file-name']
+            try:
+                db.insert_db('plugins', ('author_id', 'name', 'status'), (session['user_id'], parse_file_name[0], 1))
+            except:
+                flash('Plugin already exist. It should be unique for each upload.','error')
+                return redirect(url_for('plugin_upload'))
             
-            if file.filename == '':
-                flash('No selected file','error')
-                return redirect(request.url)
+            reload()
+            flash('Your plugin successfully installed.', 'success')
             
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                user_folder = os.path.join(UPLOAD_FOLDER, session['username'])
-                
-                if os.path.isdir(user_folder) == False:
-                    os.mkdir(user_folder)
-                
-                file_path = os.path.join(user_folder, filename)
-                parse_file_name = filename.split('.')
-                
-                if os.path.isdir(os.path.join(user_folder, parse_file_name[0])) == False and len(parse_file_name) == 2:
-                    file.save(file_path)
-                    with ZipFile(file_path, 'r') as zip:
-                        zip.extractall(user_folder)
-                    
-                    os.remove(file_path)
-
-                    if os.path.isdir(os.path.join(user_folder, parse_file_name[0])) == False:
-                        flash('Plugin folder name insize zip file should be same as zip file name.','error')
-                        return redirect(request.url)
-                    else:
-                        try:
-                            db.insert_db('plugins', ('author_id', 'name', 'status'), (session['user_id'], parse_file_name[0], 1))
-                        except:
-                            flash('Plugin already exist. It should be unique for each upload.','error')
-                            return redirect(request.url)
-                    
-                    fp = open('gorilaml/reloader.py', 'w+')
-                    fp.write("last_reloaded='%s'" % time.time())
-                    fp.close()
-                    flash('Your plugin successfully installed.', 'success')
-                    
-                    return redirect(
-                        url_for('addon_upload', token=base64.b64encode((session['username']+':'+session['password']).encode()))
-                    )
-                
-                else:
-                    flash('Plugins already exist. It should be unique for each upload.','error')
-                    return redirect(request.url)
-            
-            else:
-                flash('Please select valid file.','error')
-                return redirect(request.url)
+            return redirect(
+                url_for('plugin_upload', token=securetoken())
+            )
         
-        return render_template('addon_upload.html')
+        return render_template('plugin_upload.html', form=plugin)
     
     @app.route('/register-local', methods=['GET', 'POST'])
     @authorize
     def register_local():
-        if request.method == 'POST':
-            if 'local_plugin_path' in request.form and 'local_plugin_name' in request.form:
-                if os.path.isdir(request.form['local_plugin_path']):
-                    if os.path.isdir(os.path.join(request.form['local_plugin_path'], request.form['local_plugin_name'])):
-                        try:
-                            db.insert_db('plugins', ('author_id', 'name', 'plugin_path', 'status'), (session['user_id'], request.form['local_plugin_name'], request.form['local_plugin_path'], 1))
-                        except:
-                            flash('Plugin already exist. It should be unique for each upload.','error')
-                            return redirect(request.url)
+        local_plugin = RegisterLocalPluginForm()
+        if local_plugin.validate_on_submit():
+            try:
+                db.insert_db('plugins', ('author_id', 'name', 'plugin_path', 'status'), (session['user_id'], local_plugin.local_plugin_name.data, local_plugin.local_plugin_path.data, 1))
+            except:
+                flash('Plugin already exist. It should be unique for each upload.','error')
+                return redirect(url_for('register_local'))
 
-                        fp = open('gorilaml/reloader.py', 'w+')
-                        fp.write("last_reloaded='%s'" % time.time())
-                        fp.close()
-                        flash('Your plugin successfully installed.', 'success')
+            reload()
+            flash('Your plugin successfully installed.', 'success')
 
-                        return redirect(
-                            url_for('register_local', token=base64.b64encode((session['username']+':'+session['password']).encode()))
-                        )
-                    else:
-                        flash('Plugin does not exist inside your plugin path.','error')
-                        return redirect(request.url)
-                else:
-                    flash('Plugin path does not exist','error')
-                    return redirect(request.url)
-            else:
-                flash('All fields are required.','error')
-                return redirect(request.url)
+            return redirect(
+                url_for('register_local', token=securetoken())
+            )
         
-        return render_template('addon_upload.html')
+        return render_template('register_local.html', form=local_plugin)
 
     @app.route('/')
     @authorize
@@ -165,7 +112,7 @@ def create_app():
                 session['password'] = getuser['password']
                 flash('Welcome back, you are authenticated successfully.','success')
                 return redirect(
-                    url_for('plugins', token=base64.b64encode((session['username']+':'+session['password']).encode()))
+                    url_for('plugins', token=securetoken())
                 )
             else:
                 flash('Login failed. Please try again.','error')
@@ -173,6 +120,13 @@ def create_app():
         
         return render_template('login.html')
     
+    @app.context_processor
+    def username():
+        if 'username' in session:
+            return dict(username=session['username'])
+        else:
+            return ''
+
     try:
         with app.app_context():
             allplugins = db.query_db('SELECT t1.*,t2.username FROM plugins t1 join user t2 ON t1.author_id=t2.id WHERE t1.status=1')
