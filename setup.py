@@ -6,7 +6,7 @@ with open('README.txt') as f:
 setup(
     name='gorillaml',
     version='dev-1.0.0',
-    packages=['gorillaml',],
+    packages=['gorillaml'],
     license='Creative Commons Attribution-Noncommercial-Share Alike license',
     long_description=long_description,
     author='Washim Ahmed',
