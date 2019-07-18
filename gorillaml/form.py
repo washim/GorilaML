@@ -7,6 +7,7 @@ from flask_wtf import FlaskForm, file
 from flask_wtf.csrf import CSRFProtect
 csrf = CSRFProtect()
 
+
 def plugin_validate(form, field):
     uploaded_file = field.data
     filename = secure_filename(uploaded_file.filename)
@@ -30,6 +31,7 @@ def plugin_validate(form, field):
     if os.path.isdir(os.path.join(user_folder, parse_file_name[0])) == False:
         raise ValidationError('Plugin folder name insize zip file should be same as zip file name')
 
+
 def register_plugin_validate(form, field):
     if os.path.isdir(field.data) == False:
         raise ValidationError('Plugin path does not exist')
@@ -37,8 +39,10 @@ def register_plugin_validate(form, field):
     elif os.path.isdir(os.path.join(field.data, form.local_plugin_name.data)) == False:
         raise ValidationError('Plugin name does not exist inside your plugin path')
 
+
 class PluginUploadForm(FlaskForm):
     upload = file.FileField('Choose your addon file',[file.FileRequired(), file.FileAllowed(['zip'], 'Zip file only!'), plugin_validate])
+
 
 class RegisterLocalPluginForm(FlaskForm):
     local_plugin_name = TextField('Plugin Name', [validators.DataRequired()])

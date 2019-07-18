@@ -12,5 +12,12 @@ setup(
     author='Washim Ahmed',
     author_email='washim.ahmed@gmail.com',
     python_requires='>=3',
+    install_requires=[
+        'Flask',
+        'Flask-WTF',
+        'WTForms',
+        'Werkzeug',
+        'Flask-Cors'
+    ],
     scripts=['bin/gorillaml-canvas', 'bin/gorillaml-config']
 )

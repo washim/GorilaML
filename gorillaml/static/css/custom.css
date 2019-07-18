@@ -1,1 +1,3 @@
 h1{font-weight: lighter;}
+label{margin:0px;}
+input[type="text"] {width:350px;}

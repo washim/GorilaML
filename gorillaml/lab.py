@@ -1,11 +1,11 @@
 import base64
-import os
 import time
 from functools import wraps
 from flask import (
     session, flash, redirect, url_for, request
 )
 from gorillaml import db
+
 
 def authorize(fun):
     @wraps(fun)
@@ -30,8 +30,10 @@ def authorize(fun):
         
     return wrapper
 
+
 def securetoken():
     return base64.b64encode((str(session['user_id'])+':'+session['username']+':'+session['password']).encode())
+
 
 def reload():
     fp = open('%s/reloader.py' % __name__, 'w+')

@@ -14,11 +14,13 @@ def get_db():
 
     return g.db
 
+
 def close_db(e=None):
     db = g.pop('db', None)
 
     if db is not None:
         db.close()
+
 
 def query_db(query, args=(), one=False):
     db = get_db()
@@ -30,6 +32,7 @@ def query_db(query, args=(), one=False):
     cur.close()
     
     return rv
+
 
 def get_data(table, where_fields=(), where_values=(), one=False):
     db = get_db()
@@ -45,6 +48,7 @@ def get_data(table, where_fields=(), where_values=(), one=False):
 
     return rv
 
+
 def insert_db(table, fields=(), values=()):
     db = get_db()
     query = 'INSERT INTO %s (%s) VALUES (%s)' % (
@@ -58,6 +62,7 @@ def insert_db(table, fields=(), values=()):
     cur.close()
     
     return id
+
 
 def update_db(table, fields=(), values=(), where_fields=(), where_values=()):
     db = get_db()
@@ -73,6 +78,7 @@ def update_db(table, fields=(), values=(), where_fields=(), where_values=()):
     
     return id
 
+
 def init_db():
     db = get_db()
 
@@ -81,11 +87,13 @@ def init_db():
     
     db.commit()
 
+
 @click.command('init-db')
 @with_appcontext
 def init_db_command():
     init_db()
     click.echo('Initialized the database.')
+
 
 def init_app(app):
     app.teardown_appcontext(close_db)
