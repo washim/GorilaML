@@ -2,3 +2,4 @@ __pycache__
 gorillaml.egg-info
 .vscode
 instance
+.idea

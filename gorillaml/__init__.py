@@ -1,5 +1,4 @@
 import os
-import time
 import sys
 import importlib
 from gorillaml.lab import authorize, securetoken, reload
@@ -7,12 +6,11 @@ from gorillaml import db
 from gorillaml.reloader import last_reloaded
 from gorillaml.form import csrf, PluginUploadForm, RegisterLocalPluginForm
 from flask import (
-    Flask, Blueprint, render_template, jsonify, request, flash, redirect, url_for, session
+    Flask, render_template, request, flash, redirect, url_for, session
 )
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
-from zipfile import ZipFile
-from functools import wraps
+
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
@@ -66,7 +64,9 @@ def create_app():
         local_plugin = RegisterLocalPluginForm()
         if local_plugin.validate_on_submit():
             try:
-                db.insert_db('plugins', ('author_id', 'name', 'plugin_path', 'status'), (session['user_id'], local_plugin.local_plugin_name.data, local_plugin.local_plugin_path.data, 1))
+                db.insert_db('plugins', ('author_id', 'name', 'plugin_path', 'status'),
+                             (session['user_id'], local_plugin.local_plugin_name.data,
+                              local_plugin.local_plugin_path.data, 1))
             except:
                 flash('Plugin already exist. It should be unique for each upload.','error')
                 return redirect(url_for('register_local'))
@@ -105,7 +105,8 @@ def create_app():
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         if request.method == 'POST':
-            getuser = db.query_db('SELECT * FROM user WHERE username=? and password=?', (request.form['username'], request.form['password']), True)
+            getuser = db.query_db('SELECT * FROM user WHERE username=? and password=?',
+                                  (request.form['username'], request.form['password']), True)
             if getuser:
                 session['user_id'] = getuser['id']
                 session['username'] = getuser['username']
