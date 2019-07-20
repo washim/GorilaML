@@ -13,32 +13,40 @@
                         <th style="width: 10px">#</th>
                         <th>Name</th>
                         <th>Status</th>
+                        <th>Type</th>
+                        <th>Uploaded By</th>
                         <th>Created</th>
-                        <th>Action</th>
+                        <th>Installed/Uninstalled</th>
                     </tr>
+                    {% if plugins|length > 0 %}
                     {% for plugin in plugins %}
                     <tr>
                         <td>{{ plugin.id }}</td>
                         <td>{{ plugin.name }}</td>
                         <td>{% if plugin.status == 1%}<span class="badge bg-success">Enabled</span>{% else %}<span class="badge bg-danger">Disabled</span>{% endif %}</td>
+                        <td>{{ plugin.plugin_path }}</td>
+                        <td>{{ plugin.username }}</td>
                         <td>{{ plugin.created }}</td>
                         <td>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-default">Action</button>
-                                <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <span class="caret"></span>
-                                    <span class="sr-only">Toggle Dropdown</span>
-                                </button>
-                                <div class="dropdown-menu" role="menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(68px, 38px, 0px);">
-                                    <a class="dropdown-item" href="#">View</a>
-                                    <a class="dropdown-item" href="#">Edit</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="#">Delete</a>
-                                </div>
+                            {% if plugin.status == 1%}
+                            <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
+                              <input type="checkbox" class="custom-control-input" id="customSwitch3" url="{{ url_for('plugin_activation', status='uninstalled', pid=plugin.id) }}" checked>
+                              <label class="custom-control-label" for="customSwitch3">Installed</label>
                             </div>
+                            {% else %}
+                            <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
+                              <input type="checkbox" class="custom-control-input" id="customSwitch3" url="{{ url_for('plugin_activation', status='installed', pid=plugin.id) }}">
+                              <label class="custom-control-label" for="customSwitch3">Uninstalled</label>
+                            </div>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="7" align="center">No plugins found yet.</td>
+                    </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>

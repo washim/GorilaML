@@ -4,7 +4,7 @@ import importlib
 from gorillaml.lab import authorize, securetoken, reload
 from gorillaml import db
 from gorillaml.reloader import last_reloaded
-from gorillaml.form import csrf, PluginUploadForm, RegisterLocalPluginForm
+from gorillaml.form import csrf, PluginUploadForm, RegisterLocalPluginForm, MyaccountForm
 from flask import (
     Flask, render_template, request, flash, redirect, url_for, session
 )
@@ -91,16 +91,40 @@ def create_app():
         session.pop('username', None)
         return redirect(url_for('login'))
 
-    @app.route('/myaccount')
+    @app.route('/myaccount', methods=['GET', 'POST'])
     @authorize
     def myaccount():
-        return 'inprogress'
+        if request.args.get('plugins') == 'recreate':
+            reload()
+            flash('Plugins cache reloaded successfully. Refresh this page again.', 'success')
+            return redirect(url_for('myaccount', token=securetoken()))
+
+        else:
+            form = MyaccountForm()
+            if form.validate_on_submit():
+                db.update_db('user', ('password',), (form.confirm.data,), ('id',), (session['user_id'],))
+                flash('Password updated successfully.', 'success')
+                return redirect(url_for('myaccount'))
+
+        return render_template('myaccount.html', form=form)
 
     @app.route('/plugins')
     @authorize
     def plugins():
-        results = db.get_data('plugins')
+        name = request.args.get('name')
+        if name:
+            results = db.query_db('SELECT t1.*,t2.username FROM plugins t1 join user t2 ON t1.author_id=t2.id WHERE t1.name LIKE ?', (f'%{name}%',))
+        else:
+            results = db.query_db('SELECT t1.*,t2.username FROM plugins t1 join user t2 ON t1.author_id=t2.id')
         return render_template('plugins.html', plugins=results)
+
+    @app.route('/plugin-activation/<string:status>/<int:pid>')
+    @authorize
+    def plugin_activation(status, pid):
+        pstatus = {'installed': 1, 'uninstalled': 0}
+        db.update_db('plugins', ('status',), (pstatus[status],), ('id',), (pid,))
+
+        return redirect(url_for('plugins', token=securetoken()))
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
@@ -111,7 +135,6 @@ def create_app():
                 session['user_id'] = getuser['id']
                 session['username'] = getuser['username']
                 session['password'] = getuser['password']
-                flash('Welcome back, you are authenticated successfully.','success')
                 return redirect(
                     url_for('plugins', token=securetoken())
                 )

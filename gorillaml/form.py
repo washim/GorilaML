@@ -2,7 +2,7 @@ import os
 from werkzeug.utils import secure_filename
 from zipfile import ZipFile
 from flask import current_app, session
-from wtforms import TextField, validators, ValidationError
+from wtforms import StringField, PasswordField, validators, ValidationError
 from flask_wtf import FlaskForm, file
 from flask_wtf.csrf import CSRFProtect
 csrf = CSRFProtect()
@@ -39,11 +39,22 @@ def register_plugin_validate(form, field):
     elif os.path.isdir(os.path.join(field.data, form.local_plugin_name.data)) == False:
         raise ValidationError('Plugin name does not exist inside your plugin path')
 
+def password_validate(form, field):
+    if session['password'] != field.data:
+        raise ValidationError('Current password does not match.')
+
 
 class PluginUploadForm(FlaskForm):
     upload = file.FileField('Choose your addon file',[file.FileRequired(), file.FileAllowed(['zip'], 'Zip file only!'), plugin_validate])
 
 
 class RegisterLocalPluginForm(FlaskForm):
-    local_plugin_name = TextField('Plugin Name', [validators.DataRequired()])
-    local_plugin_path = TextField('Plugin Path', [validators.DataRequired(), register_plugin_validate])
+    local_plugin_name = StringField('Plugin Name', [validators.DataRequired()])
+    local_plugin_path = StringField('Plugin Path', [validators.DataRequired(), register_plugin_validate])
+
+
+class MyaccountForm(FlaskForm):
+    current_password = PasswordField('Current Password', [validators.DataRequired(), password_validate])
+    password = PasswordField('New Password', [validators.DataRequired(),
+                                              validators.EqualTo('confirm', message='Passwords must match')])
+    confirm = PasswordField('Repeat Password', [validators.DataRequired()])

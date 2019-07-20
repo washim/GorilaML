@@ -30,9 +30,9 @@
             </ul>
 
             <!-- SEARCH FORM -->
-            <form class="form-inline ml-3">
+            <form class="form-inline ml-3" method="get" action="{{ url_for('plugins') }}">
                 <div class="input-group input-group-sm">
-                    <input class="form-control form-control-navbar" type="search" placeholder="Plugins Search" aria-label="Search">
+                    <input class="form-control form-control-navbar" name="name" type="search" placeholder="Plugins Search" aria-label="Search">
                     <div class="input-group-append">
                         <button class="btn btn-navbar" type="submit">
                             <i class="fas fa-search"></i>
@@ -82,22 +82,22 @@
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
                                     <a href="/" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i> <p>Home</p>
+                                        <i class="far fa-circle nav-icon text-primary"></i> <p>Home</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ url_for('plugins') }}" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i> <p>Plugins</p>
+                                        <i class="far fa-circle nav-icon text-warning"></i> <p>Plugins</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ url_for('plugin_upload') }}" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i> <p>Plugin Upload</p>
+                                        <i class="far fa-circle nav-icon text-info"></i> <p>Plugin Upload</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ url_for('register_local') }}" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i> <p>Local Plugin Register</p>
+                                        <i class="far fa-circle nav-icon text-danger"></i> <p>Local Plugin Register</p>
                                     </a>
                                 </li>
                             </ul>
@@ -116,7 +116,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0 text-dark">GorilaML API Management Services</h1>
+                            <h1 class="m-0 text-dark">Gorilla Management Lab</h1>
                         </div><!-- /.col -->
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
@@ -139,11 +139,11 @@
                             <div class="alert alert-danger alert-dismissible">
                                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
                                 <h5><i class="icon fas fa-ban"></i> Error!</h5>
-                                <ol>
+                                <ul>
                                     {% for msg in messages %}
                                     <li>{{ msg }}</li>
                                     {% endfor %}
-                                </ol>
+                                </ul>
                                 
                             </div>
                         </div>
@@ -155,11 +155,11 @@
                             <div class="alert alert-info alert-dismissible">
                                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
                                 <h5><i class="icon fas fa-check"></i> Success!</h5>
-                                <ol>
+                                <ul>
                                     {% for msg in messages %}
                                     <li>{{ msg }}</li>
                                     {% endfor %}
-                                </ol>
+                                </ul>
                             </div>
                         </div>
                         {% endif %}
@@ -191,6 +191,9 @@
     $(function() {
         $('.btn-primary').bind('click', function() {
             $($(this).attr('frmtarget')).submit();
+        });
+        $('.custom-control-input').bind('click', function() {
+            $(location).attr('href', $(this).attr('url'));
         });
     });
     </script>

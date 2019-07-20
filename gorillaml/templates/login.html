@@ -23,11 +23,11 @@
         <div class="alert alert-danger alert-dismissible">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
             <h5><i class="icon fas fa-ban"></i> Authentication Error!</h5>
-            <ol>
+            <ul>
                 {% for msg in messages %}
                 <li>{{ msg }}</li>
                 {% endfor %}
-            </ol>
+            </ul>
         </div>
         {% endif %}
         {% endwith %}
@@ -36,11 +36,11 @@
         <div class="alert alert-info alert-dismissible">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
             <h5><i class="icon fas fa-check"></i> Success!</h5>
-            <ol>
+            <ul>
                 {% for msg in messages %}
                 <li>{{ msg }}</li>
                 {% endfor %}
-            </ol>
+            </ul>
         </div>
         {% endif %}
         {% endwith %}
