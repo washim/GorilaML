@@ -1,16 +1,45 @@
-import sqlite3
 import click
-from flask import current_app, g
+from flask import g
 from flask.cli import with_appcontext
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, relationship
+from datetime import datetime
+
+Base = declarative_base()
+
+
+class Users(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    username = Column('username', String, nullable=False, unique=True)
+    password = Column('password', String, nullable=False)
+    created = Column('created', Date, nullable=False, default=datetime.now)
+    plugins = relationship('Plugins', back_populates='user')
+
+    def __repr__(self):
+        return f"<Users(username='{self.username}', password='{self.password}')>"
+
+
+class Plugins(Base):
+    __tablename__ = 'plugins'
+    id = Column(Integer, primary_key=True)
+    author_id = Column(Integer, ForeignKey('users.id'))
+    name = Column('name', String, nullable=False)
+    plugin_path = Column('plugin_path', String, nullable=False, default='system')
+    status = Column('status', Integer, nullable=False, default=0)
+    created = Column('created', Date, nullable=False, default=datetime.now)
+    user = relationship('Users', back_populates='plugins')
+
+    def __repr__(self):
+        return f"<Plugins(name='{self.name}', plugin_path='{self.plugin_path}')>"
 
 
 def get_db():
     if 'db' not in g:
-        g.db = sqlite3.connect(
-            current_app.config['DATABASE'],
-            detect_types=sqlite3.PARSE_DECLTYPES
-        )
-        g.db.row_factory = sqlite3.Row
+        engine = create_engine(f"sqlite:///instance/{__name__}.sqlite")
+        dbsession = sessionmaker(bind=engine)
+        g.db = dbsession()
 
     return g.db
 
@@ -22,70 +51,20 @@ def close_db(e=None):
         db.close()
 
 
-def query_db(query, args=(), one=False):
-    db = get_db()
-    cur = db.execute(query, args)
-    if one:
-        rv = cur.fetchone()
-    else:
-        rv = cur.fetchall()
-    cur.close()
-    
-    return rv
-
-
-def get_data(table, where_fields=(), where_values=(), one=False):
-    db = get_db()
-    query = 'SELECT * FROM %s' % table
-    if len(where_fields) > 0:
-        query += ' WHERE %s' % (' and '.join(['%s=?' % where_field for where_field in where_fields]))
-    cur = db.execute(query, where_values)
-    if one:
-        rv = cur.fetchone()
-    else:
-        rv = cur.fetchall()
-    cur.close()
-
-    return rv
-
-
-def insert_db(table, fields=(), values=()):
-    db = get_db()
-    query = 'INSERT INTO %s (%s) VALUES (%s)' % (
-        table,
-        ', '.join(fields),
-        ', '.join(['?'] * len(values))
-    )
-    cur = db.execute(query, values)
-    db.commit()
-    id = cur.lastrowid
-    cur.close()
-    
-    return id
-
-
-def update_db(table, fields=(), values=(), where_fields=(), where_values=()):
-    db = get_db()
-    query = 'UPDATE %s SET %s WHERE %s' % (
-        table,
-        ','.join(['%s=?' % field for field in fields]),
-        ' and '.join(['%s=?' % where_field for where_field in where_fields])
-    )
-    cur = db.execute(query, values+where_values)
-    db.commit()
-    id = cur.rowcount
-    cur.close()
-    
-    return id
-
-
 def init_db():
-    db = get_db()
+    engine = create_engine(f"sqlite:///instance/{__name__}.sqlite")
+    Base.metadata.create_all(engine)
 
-    with current_app.open_resource('schema.sql') as f:
-        db.executescript(f.read().decode('utf8'))
-    
-    db.commit()
+    dbsession = sessionmaker(bind=engine)
+    session = dbsession()
+    admin = Users(username='admin', password='admin')
+    session.add(admin)
+    session.commit()
+
+
+def init_app(app):
+    app.teardown_appcontext(close_db)
+    app.cli.add_command(init_db_command)
 
 
 @click.command('init-db')
@@ -93,8 +72,3 @@ def init_db():
 def init_db_command():
     init_db()
     click.echo('Initialized the database.')
-
-
-def init_app(app):
-    app.teardown_appcontext(close_db)
-    app.cli.add_command(init_db_command)

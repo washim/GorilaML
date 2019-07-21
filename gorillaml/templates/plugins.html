@@ -23,20 +23,25 @@
                     <tr>
                         <td>{{ plugin.id }}</td>
                         <td>{{ plugin.name }}</td>
-                        <td>{% if plugin.status == 1%}<span class="badge bg-success">Enabled</span>{% else %}<span class="badge bg-danger">Disabled</span>{% endif %}</td>
+                        <td>{% if plugin.status == 1 %}<span class="badge bg-success">Enabled</span>{% elif plugin.status == 2 %}<span class="badge bg-danger">Disabled</span>{% else %}<span class="badge bg-warning">Pending Approval</span>{% endif %}</td>
                         <td>{{ plugin.plugin_path }}</td>
-                        <td>{{ plugin.username }}</td>
+                        <td>{{ plugin.user.username }}</td>
                         <td>{{ plugin.created }}</td>
                         <td>
-                            {% if plugin.status == 1%}
+                            {% if plugin.status == 1 %}
                             <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
                               <input type="checkbox" class="custom-control-input" id="customSwitch3" url="{{ url_for('plugin_activation', status='uninstalled', pid=plugin.id) }}" checked>
                               <label class="custom-control-label" for="customSwitch3">Installed</label>
                             </div>
-                            {% else %}
+                            {% elif plugin.status == 2 %}
                             <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
                               <input type="checkbox" class="custom-control-input" id="customSwitch3" url="{{ url_for('plugin_activation', status='installed', pid=plugin.id) }}">
                               <label class="custom-control-label" for="customSwitch3">Uninstalled</label>
+                            </div>
+                            {% else %}
+                            <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
+                              <input type="checkbox" class="custom-control-input" id="customSwitch3" url="{{ url_for('plugin_activation', status='installed', pid=plugin.id) }}">
+                              <label class="custom-control-label" for="customSwitch3">Pending Approval</label>
                             </div>
                             {% endif %}
                         </td>
