@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="col-md-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Upload your plugin</h3>
+        </div>
+        <div class="card-body">
+            <form id="form_addon_upload" role="form" method="POST" enctype="multipart/form-data" action="{{ request.url }}">
+                {{ form.csrf_token }}
+                <div class="form-group">
+                    <label for="addon-file-input">Choose your addon file</label>
+                    <div class="input-group">
+                        <div class="custom-file">
+                            {{ form.upload }}
+                        </div>
+                    </div>
+                    {% for message in form.upload.errors %}
+                        <div>{{ message }}</div>
+                    {% endfor %}
+                </div>
+            </form>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary" frmtarget="#form_addon_upload">Upload</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

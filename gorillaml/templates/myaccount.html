@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="col-md-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Change Password</h3>
+        </div>
+        <div class="card-body">
+            <form id="form_change_password" role="form" method="POST" action="{{ url_for('myaccount') }}">
+                {{ form.csrf_token }}
+                <table>
+                    <tr>
+                        <td>{{ form.current_password.label }}</td>
+                        <td>{{ form.current_password }}</td>
+                        <td>
+                            {% for message in form.current_password.errors %}
+                                <div>{{ message }}</div>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{{ form.password.label }}</td>
+                        <td>{{ form.password }}</td>
+                        <td>
+                            {% for message in form.password.errors %}
+                                <div>{{ message }}</div>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{{ form.confirm.label }}</td>
+                        <td>{{ form.confirm }}</td>
+                        <td>
+                            {% for message in form.confirm.errors %}
+                                <div>{{ message }}</div>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary" frmtarget="#form_change_password">Change Password</button>
+        </div>
+    </div>
+</div>
+<div class="col-md-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Recreate Plugins Cache</h3>
+        </div>
+        <div class="card-body">
+            <form id="form_plugins_recreate" method="get" action="{{ url_for('myaccount') }}">
+                <input type="hidden" name="plugins" value="recreate" />
+                <button type="submit" class="btn btn-danger btn-primary">Recreate</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

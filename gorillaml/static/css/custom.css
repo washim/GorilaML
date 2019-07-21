@@ -1,0 +1,7 @@
+h1{font-weight: lighter;}
+label{margin:0px;}
+input[type="text"], input[type="password"] {width:350px;}
+.custom-switch.custom-switch-on-success .custom-control-input:checked ~ .custom-control-label::before,
+.custom-switch.custom-switch-on-success .custom-control-input:checked ~ .custom-control-label::after,
+.custom-switch.custom-switch-off-danger .custom-control-input ~ .custom-control-label::before,
+.custom-switch.custom-switch-off-danger .custom-control-input ~ .custom-control-label::after{cursor: pointer;}
