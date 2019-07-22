@@ -20,9 +20,14 @@ setup(
         'WTForms>=2.2.1',
         'Werkzeug>=0.15.5',
         'Flask-Cors>=3.0.8',
-        'SQLAlchemy>=1.3.6'
+        'SQLAlchemy>=1.3.6',
+        'click>=7.0'
     ],
-    scripts=['bin/gorillaml-canvas', 'bin/gorillaml-config'],
+    entry_points={
+        'console_scripts': [
+            'gorillaml-canvas=gorillaml:cli'
+        ],
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
