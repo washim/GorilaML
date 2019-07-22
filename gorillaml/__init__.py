@@ -1,5 +1,6 @@
 import os
 import sys
+import click
 import importlib
 from gorillaml.lab import authorize, securetoken, reload
 from gorillaml import db
@@ -9,6 +10,7 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
+from flask.cli import FlaskGroup
 
 
 def create_app():
@@ -32,7 +34,7 @@ def create_app():
         os.mkdir(app.config['PLUGIN_UPLOAD_FOLDER'])
 
     sys.path.append(app.instance_path)
-
+    
     @app.route('/plugin-upload', methods=['GET', 'POST'])
     @authorize
     def plugin_upload():
@@ -163,7 +165,6 @@ def create_app():
         else:
             return ''
 
-
     with app.app_context():
         dbconn = db.get_db()
         try:
@@ -187,3 +188,9 @@ def create_app():
             pass
 
     return app
+
+
+@click.group(cls=FlaskGroup, create_app=create_app)
+def cli():
+    os.environ['FLASK_ENV'] = 'development'
+    click.echo(' * GorillaML server started')
