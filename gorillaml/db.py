@@ -1,5 +1,5 @@
 import click
-from flask import g
+from flask import g, current_app
 from flask.cli import with_appcontext
 from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
@@ -37,7 +37,7 @@ class Plugins(Base):
 
 def get_db():
     if 'db' not in g:
-        engine = create_engine(f"sqlite:///instance/{__name__}.sqlite")
+        engine = create_engine(f"sqlite:///{current_app.instance_path}/{__name__}.sqlite")
         dbsession = sessionmaker(bind=engine)
         g.db = dbsession()
 
@@ -52,7 +52,7 @@ def close_db(e=None):
 
 
 def init_db():
-    engine = create_engine(f"sqlite:///instance/{__name__}.sqlite")
+    engine = create_engine(f"sqlite:///{current_app.instance_path}/{__name__}.sqlite")
     Base.metadata.create_all(engine)
 
     dbsession = sessionmaker(bind=engine)
