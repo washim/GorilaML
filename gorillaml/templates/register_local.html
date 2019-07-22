@@ -9,10 +9,10 @@
         <div class="card-body">
             <form id="form_register_plugin" role="form" method="POST" action="{{ request.url }}">
                 {{ form.csrf_token }}
-                <table>
+                <table cellpadding="5">
                     <tr>
                         <td>{{ form.local_plugin_name.label }}</td>
-                        <td>{{ form.local_plugin_name }}</td>
+                        <td>{{ form.local_plugin_name(class_="form-control") }}</td>
                         <td>
                             {% for message in form.local_plugin_name.errors %}
                                 <div>{{ message }}</div>
@@ -21,7 +21,7 @@
                     </tr>
                     <tr>
                         <td>{{ form.local_plugin_path.label }}</td>
-                        <td>{{ form.local_plugin_path }}</td>
+                        <td>{{ form.local_plugin_path(class_="form-control") }}</td>
                         <td>
                             {% for message in form.local_plugin_path.errors %}
                                 <div>{{ message }}</div>

@@ -88,7 +88,7 @@ def create_app():
     @app.route('/')
     @authorize
     def home():
-        return render_template('home.html')
+        return redirect(url_for('plugins'))
 
     @app.route('/logout')
     @authorize
