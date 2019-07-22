@@ -5,19 +5,27 @@ with open('README.txt') as f:
 
 setup(
     name='gorillaml',
-    version='dev-1.0.0',
+    version='0.0.1-dev0',
     packages=['gorillaml'],
-    license='Creative Commons Attribution-Noncommercial-Share Alike license',
+    license='MIT license',
+    url="https://www.gorillaml.com",
     long_description=long_description,
     author='Washim Ahmed',
     author_email='washim.ahmed@gmail.com',
     python_requires='>=3',
+    include_package_data=True,
     install_requires=[
-        'Flask',
-        'Flask-WTF',
-        'WTForms',
-        'Werkzeug',
-        'Flask-Cors'
+        'Flask>=1.1.1',
+        'Flask-WTF>=0.14.2',
+        'WTForms>=2.2.1',
+        'Werkzeug>=0.15.5',
+        'Flask-Cors>=3.0.8',
+        'SQLAlchemy>=1.3.6'
     ],
-    scripts=['bin/gorillaml-canvas', 'bin/gorillaml-config']
+    scripts=['bin/gorillaml-canvas', 'bin/gorillaml-config'],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ]
 )
