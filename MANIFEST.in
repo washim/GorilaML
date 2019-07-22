@@ -1,0 +1,2 @@
+recursive-include gorillaml/static *
+recursive-include gorillaml/templates *

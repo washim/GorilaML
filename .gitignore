@@ -3,3 +3,6 @@ gorillaml.egg-info
 .vscode
 instance
 .idea
+build
+dist
+ENV
