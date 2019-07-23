@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="col-md-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Site Configurations</h3>
+        </div>
+        <div class="card-body">
+            <form id="form_site_config" role="form" method="POST" action="{{ url_for('site_config') }}">
+                {{ form.csrf_token }}
+                <table cellpadding='5'>
+                    <tr>
+                        <td>{{ form.site_logo.label }}</td>
+                        <td>{{ form.site_logo(class_="form-control", placeholder="Enter absolute Path") }}</td>
+                        <td>
+                            {% for message in form.site_logo.errors %}
+                                <div>{{ message }}</div>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{{ form.site_name.label }}</td>
+                        <td>{{ form.site_name(class_="form-control") }}</td>
+                        <td>
+                            {% for message in form.site_name.errors %}
+                                <div>{{ message }}</div>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{{ form.site_slogan.label }}</td>
+                        <td>{{ form.site_slogan(class_="form-control") }}</td>
+                        <td>
+                            {% for message in form.site_slogan.errors %}
+                                <div>{{ message }}</div>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{{ form.page_title.label }}</td>
+                        <td>{{ form.page_title(class_="form-control") }}</td>
+                        <td>
+                            {% for message in form.page_title.errors %}
+                                <div>{{ message }}</div>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary" frmtarget="#form_site_config">Save Config</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

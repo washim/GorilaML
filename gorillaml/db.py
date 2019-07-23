@@ -34,6 +34,15 @@ class Plugins(Base):
     def __repr__(self):
         return f"<Plugins(name='{self.name}', plugin_path='{self.plugin_path}')>"
 
+class Configs(Base):
+    __tablename__ = 'configs'
+    id = Column(Integer, primary_key=True)
+    key = Column('key', String, nullable=False, unique=True)
+    value = Column('value', String, nullable=False)
+
+    def __repr__(self):
+        return f"<Configs(key='{self.key}', value='{self.value}')>"
+
 
 def get_db():
     if 'db' not in g:

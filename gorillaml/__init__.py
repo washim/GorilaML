@@ -4,7 +4,7 @@ import click
 import importlib
 from gorillaml.lab import authorize, securetoken, reload
 from gorillaml import db
-from gorillaml.form import csrf, PluginUploadForm, RegisterLocalPluginForm, MyaccountForm
+from gorillaml import form
 from flask import (
     Flask, render_template, request, flash, redirect, url_for, session
 )
@@ -21,7 +21,7 @@ def create_app():
     )
 
     CORS(app)
-    csrf.init_app(app)
+    form.csrf.init_app(app)
     db.init_app(app)
 
     if 'GORILAML_SETTINGS' in os.environ:
@@ -39,7 +39,7 @@ def create_app():
     @authorize
     def plugin_upload():
         dbconn = db.get_db()
-        plugin = PluginUploadForm()
+        plugin = form.PluginUploadForm()
 
         if plugin.validate_on_submit():
             filename = secure_filename(plugin.upload.data.filename)
@@ -65,7 +65,7 @@ def create_app():
     @authorize
     def register_local():
         dbconn = db.get_db()
-        local_plugin = RegisterLocalPluginForm()
+        local_plugin = form.RegisterLocalPluginForm()
 
         if local_plugin.validate_on_submit():
             try:
@@ -84,6 +84,49 @@ def create_app():
             )
 
         return render_template('register_local.html', form=local_plugin)
+
+    @app.route('/site-config', methods=['GET','POST'])
+    @authorize
+    def site_config():
+        dbconn = db.get_db()
+        siteconfig = dbconn.query(db.Configs).all()
+        config = form.RegisterSiteConfigForm(siteconfig)
+
+        for item in siteconfig:
+            if item.key == 'site_logo':
+                config.site_logo.data = item.value
+            elif item.key == 'site_name':
+                config.site_name.data = item.value
+            elif item.key == 'site_slogan':
+                config.site_slogan.data = item.value
+            elif item.key == 'page_title':
+                config.page_title.data = item.value
+
+        if config.validate_on_submit():
+            try:
+                dbconn.add(db.Configs(key='site_logo', value=config.site_logo.data))
+            except:
+                dbconn.query(db.Configs).filter(db.Configs.key == 'site_logo').update({'value': config.site_logo.data})
+
+            try:
+                dbconn.add(db.Configs(key='site_name', value=config.site_name.data))
+            except:
+                dbconn.query(db.Configs).filter(db.Configs.key == 'site_name').update({'value': config.site_name.data})
+
+            try:
+                dbconn.add(db.Configs(key='site_slogan', value=config.site_slogan.data))
+            except:
+                dbconn.query(db.Configs).filter(db.Configs.key == 'site_slogan').update({'value': config.site_slogan.data})
+
+            try:
+                dbconn.add(db.Configs(key='page_title', value=config.page_title.data))
+            except:
+                dbconn.query(db.Configs).filter(db.Configs.key == 'page_title').update({'value': config.page_title.data})
+
+            dbconn.commit()
+            flash('Configuration updated successfully.', 'success')
+
+        return render_template('site_config.html', form=config)
 
     @app.route('/')
     @authorize
@@ -109,14 +152,14 @@ def create_app():
 
         else:
             dbconn = db.get_db()
-            form = MyaccountForm()
-            if form.validate_on_submit():
-                dbconn.query(db.Users).filter(db.Users.id == session['user_id']).update({'password': form.confirm.data})
+            myaccount = form.MyaccountForm()
+            if myaccount.validate_on_submit():
+                dbconn.query(db.Users).filter(db.Users.id == session['user_id']).update({'password': myaccount.confirm.data})
                 dbconn.commit()
                 flash('Password updated successfully.', 'success')
                 return redirect(url_for('logout'))
 
-        return render_template('myaccount.html', form=form)
+        return render_template('myaccount.html', form=myaccount)
 
     @app.route('/plugins')
     @authorize
@@ -193,4 +236,3 @@ def create_app():
 @click.group(cls=FlaskGroup, create_app=create_app)
 def cli():
     os.environ['FLASK_ENV'] = 'development'
-    click.echo(' * GorillaML server started')

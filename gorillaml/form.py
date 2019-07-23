@@ -58,3 +58,10 @@ class MyaccountForm(FlaskForm):
     password = PasswordField('New Password', [validators.DataRequired(),
                                               validators.EqualTo('confirm', message='Passwords must match')])
     confirm = PasswordField('Repeat Password', [validators.DataRequired()])
+
+
+class RegisterSiteConfigForm(FlaskForm):
+    site_name = StringField('Site name', [validators.DataRequired()])
+    site_slogan = StringField('Site slogan', [validators.DataRequired()])
+    site_logo = StringField('Site logo', [validators.DataRequired()])
+    page_title = StringField('Page title', [validators.DataRequired()])

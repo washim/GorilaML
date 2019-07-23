@@ -21,7 +21,8 @@ setup(
         'Werkzeug>=0.15.5',
         'Flask-Cors>=3.0.8',
         'SQLAlchemy>=1.3.6',
-        'click>=7.0'
+        'click>=7.0',
+        'watchdog>=0.9.0'
     ],
     entry_points={
         'console_scripts': [
