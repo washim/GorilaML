@@ -89,44 +89,56 @@ def create_app():
     @authorize
     def site_config():
         dbconn = db.get_db()
+
+        sitedata = {}
         siteconfig = dbconn.query(db.Configs).all()
-        config = form.RegisterSiteConfigForm(siteconfig)
 
         for item in siteconfig:
             if item.key == 'site_logo':
-                config.site_logo.data = item.value
+                sitedata['site_logo'] = item.value
             elif item.key == 'site_name':
-                config.site_name.data = item.value
+                sitedata['site_name'] = item.value
             elif item.key == 'site_slogan':
-                config.site_slogan.data = item.value
+                sitedata['site_slogan'] = item.value
             elif item.key == 'page_title':
-                config.page_title.data = item.value
+                sitedata['page_title'] = item.value
+            elif item.key == 'copyrights':
+                sitedata['copyrights'] = item.value
+
+        config = form.RegisterSiteConfigForm(site_name=sitedata['site_name'], site_slogan=sitedata['site_slogan'],
+                                             page_title=sitedata['page_title'], copyrigths=sitedata['copyrights'])
+        if sitedata['copyrights'] == 'no':
+            config.copyrights.data = False
+        else:
+            config.copyrights.data = True
 
         if config.validate_on_submit():
-            try:
-                dbconn.add(db.Configs(key='site_logo', value=config.site_logo.data))
-            except:
-                dbconn.query(db.Configs).filter(db.Configs.key == 'site_logo').update({'value': config.site_logo.data})
+            uploaded_file = config.site_logo.data
 
             try:
-                dbconn.add(db.Configs(key='site_name', value=config.site_name.data))
-            except:
-                dbconn.query(db.Configs).filter(db.Configs.key == 'site_name').update({'value': config.site_name.data})
+                filename = secure_filename(uploaded_file.filename)
+                file_path = os.path.join(app.root_path, 'static/img', filename)
+                uploaded_file.save(file_path)
 
-            try:
-                dbconn.add(db.Configs(key='site_slogan', value=config.site_slogan.data))
+                dbconn.query(db.Configs).filter(db.Configs.key == 'site_logo').update({'value': filename})
             except:
-                dbconn.query(db.Configs).filter(db.Configs.key == 'site_slogan').update({'value': config.site_slogan.data})
+                pass
 
-            try:
-                dbconn.add(db.Configs(key='page_title', value=config.page_title.data))
-            except:
-                dbconn.query(db.Configs).filter(db.Configs.key == 'page_title').update({'value': config.page_title.data})
+            dbconn.query(db.Configs).filter(db.Configs.key == 'site_name').update({'value': config.site_name.data})
+            dbconn.query(db.Configs).filter(db.Configs.key == 'site_slogan').update({'value': config.site_slogan.data})
+            dbconn.query(db.Configs).filter(db.Configs.key == 'page_title').update({'value': config.page_title.data})
+            if request.form.get('copyrights') == 'y':
+                copyrights_string = 'yes'
+            else:
+                copyrights_string = 'no'
+            dbconn.query(db.Configs).filter(db.Configs.key == 'copyrights').update({'value': copyrights_string})
 
             dbconn.commit()
-            flash('Configuration updated successfully.', 'success')
 
-        return render_template('site_config.html', form=config)
+            flash('Configuration updated successfully.', 'success')
+            return redirect(url_for('site_config'))
+
+        return render_template('site_config.html', form=config, context=dict(site_logo=sitedata['site_logo']))
 
     @app.route('/')
     @authorize
@@ -203,10 +215,26 @@ def create_app():
 
     @app.context_processor
     def username():
+        dbconn = db.get_db()
+        siteconfig = dbconn.query(db.Configs).all()
+        site_context = {}
+
+        for item in siteconfig:
+            if item.key == 'site_logo':
+                site_context['site_logo'] = item.value
+            elif item.key == 'site_name':
+                site_context['site_name'] = item.value
+            elif item.key == 'site_slogan':
+                site_context['site_slogan'] = item.value
+            elif item.key == 'page_title':
+                site_context['page_title'] = item.value
+            elif item.key == 'copyrights':
+                site_context['copyrights'] = item.value
+
         if 'username' in session:
-            return dict(username=session['username'])
-        else:
-            return ''
+            site_context['username'] = session['username']
+
+        return site_context
 
     with app.app_context():
         dbconn = db.get_db()

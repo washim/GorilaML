@@ -68,7 +68,13 @@ def init_db():
     session = dbsession()
     admin = Users(username='admin', password='admin')
     session.add(admin)
+    session.add(Configs(key='site_logo', value='logo.png'))
+    session.add(Configs(key='site_name', value='GorillaMl'))
+    session.add(Configs(key='site_slogan', value='Gorilla Managed Lab'))
+    session.add(Configs(key='page_title', value='Gorilla Managed Lab'))
+    session.add(Configs(key='copyrights', value='yes'))
     session.commit()
+    session.close()
 
 
 def init_app(app):

@@ -2,7 +2,7 @@ import os
 from werkzeug.utils import secure_filename
 from zipfile import ZipFile
 from flask import current_app, session
-from wtforms import StringField, PasswordField, validators, ValidationError
+from wtforms import StringField, PasswordField, BooleanField, validators, ValidationError
 from flask_wtf import FlaskForm, file
 from flask_wtf.csrf import CSRFProtect
 csrf = CSRFProtect()
@@ -32,6 +32,17 @@ def plugin_validate(form, field):
         raise ValidationError('Plugin folder name insize zip file should be same as zip file name')
 
 
+def site_logo_validate(form, field):
+    uploaded_file = field.data
+    filename = secure_filename(uploaded_file.filename)
+
+    file_path = os.path.join(current_app.instance_path, filename)
+    uploaded_file.save(file_path)
+
+    if os.path.isdir(os.path.join(user_folder, parse_file_name[0])) == False:
+        raise ValidationError('Plugin folder name insize zip file should be same as zip file name')
+
+
 def register_plugin_validate(form, field):
     if os.path.isdir(field.data) == False:
         raise ValidationError('Plugin path does not exist')
@@ -45,7 +56,7 @@ def password_validate(form, field):
 
 
 class PluginUploadForm(FlaskForm):
-    upload = file.FileField('Choose your addon file',[file.FileRequired(), file.FileAllowed(['zip'], 'Zip file only!'), plugin_validate])
+    upload = file.FileField('Choose your addon file', [file.FileRequired(), file.FileAllowed(['zip'], 'Zip file only!'), plugin_validate])
 
 
 class RegisterLocalPluginForm(FlaskForm):
@@ -63,5 +74,6 @@ class MyaccountForm(FlaskForm):
 class RegisterSiteConfigForm(FlaskForm):
     site_name = StringField('Site name', [validators.DataRequired()])
     site_slogan = StringField('Site slogan', [validators.DataRequired()])
-    site_logo = StringField('Site logo', [validators.DataRequired()])
+    site_logo = file.FileField('Site logo', [file.FileAllowed(['png', 'jpeg', 'jpg', 'gif'])])
     page_title = StringField('Page title', [validators.DataRequired()])
+    copyrights = BooleanField('Enable/Disable Copyrights footer')

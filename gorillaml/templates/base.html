@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>Gorilla Managed Lab</title>
+  <title>{{ page_title }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='plugins/fontawesome-free/css/all.min.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/4.5.6/css/ionicons.min.css" integrity="sha256-kx16nUTlNRyEpdk7cvpnqblbDbTe/nADul9o2uYeGSw=" crossorigin="anonymous" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/adminlte.min.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-  <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='img/64x64.png') }}"/>
-  <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='img/64x64.png') }}"/>
+  <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}"/>
+  <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}"/>
 </head>
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
@@ -51,14 +51,14 @@
 
         <aside class="main-sidebar sidebar-light-primary elevation-4">
             <a href="/" class="brand-link">
-                <img src="{{ url_for('static', filename='img/64x64.png') }}" class="brand-image img-circle elevation-3">
-                <span class="brand-text font-weight-light"><b>GorillaML</b></span>
+                <img src="/static/img/{{ site_logo }}" class="brand-image img-circle elevation-3">
+                <span class="brand-text font-weight-light"><b>{{ site_name }}</b></span>
             </a>
 
             <div class="sidebar">
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                     <div class="image">
-                        <img src="{{ url_for('static', filename='img/avatar04.png') }}" class="img-circle elevation-2" alt="User Image">
+                        <img src="{{ url_for('static', filename='img/avatar.png') }}" class="img-circle elevation-2" alt="User Image">
                     </div>
                     <div class="info">
                         <a href="#" class="d-block">{{ username }}</a>
@@ -109,7 +109,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0 text-dark">Gorilla Managed Lab</h1>
+                            <h1 class="m-0 text-dark">{{ site_slogan }}</h1>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
@@ -163,8 +163,7 @@
         </div>
 
         <footer class="main-footer">
-            All rights reserved by <a href="mailto:washim.ahmed@gmail.com">Washim Ahmed</a>
-            <div class="float-right d-none d-sm-inline-block"><b>Version</b> gorillaml-0.0.1-dev1</div>
+            {% if copyrights == 'yes' %}All rights reserved by <a href="mailto:washim.ahmed@gmail.com">Washim Ahmed</a>{% endif %}&nbsp;<div class="float-right d-none d-sm-inline-block"><b>Version</b> gorillaml-0.0.1-dev1</div>
         </footer>
     </div>
     <script src="{{ url_for('static', filename='plugins/jquery/jquery.min.js') }}"></script>
