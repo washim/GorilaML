@@ -14,11 +14,13 @@ class Users(Base):
     id = Column(Integer, primary_key=True)
     username = Column('username', String, nullable=False, unique=True)
     password = Column('password', String, nullable=False)
+    role = Column('role', String, nullable=False)
+    status = Column('status', String, nullable=False)
     created = Column('created', Date, nullable=False, default=datetime.now)
     plugins = relationship('Plugins', back_populates='user')
 
     def __repr__(self):
-        return f"<Users(username='{self.username}', password='{self.password}')>"
+        return f"<Users(username='{self.username}', password='{self.password}', role='{self.role}')>"
 
 
 class Plugins(Base):
@@ -66,13 +68,15 @@ def init_db():
 
     dbsession = sessionmaker(bind=engine)
     session = dbsession()
-    admin = Users(username='admin', password='admin')
+    admin = Users(username='admin', password='admin', role='admin', status='enabled')
     session.add(admin)
     session.add(Configs(key='site_logo', value='logo.png'))
-    session.add(Configs(key='site_name', value='GorillaMl'))
+    session.add(Configs(key='site_name', value='GorillaML'))
     session.add(Configs(key='site_slogan', value='Gorilla Managed Lab'))
     session.add(Configs(key='page_title', value='Gorilla Managed Lab'))
     session.add(Configs(key='copyrights', value='yes'))
+    session.add(Configs(key='available_version', value=current_app.config['VERSION']))
+    session.add(Configs(key='available_version_check_date', value=datetime.today()))
     session.commit()
     session.close()
 

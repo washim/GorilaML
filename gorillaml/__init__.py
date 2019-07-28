@@ -2,7 +2,8 @@ import os
 import sys
 import click
 import importlib
-from gorillaml.lab import authorize, securetoken, reload
+from datetime import datetime
+from gorillaml.lab import authorize, admin_login_required, securetoken, reload, check_new_version
 from gorillaml import db
 from gorillaml import form
 from flask import (
@@ -17,7 +18,8 @@ def create_app():
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY=os.urandom(12),
-        PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons')
+        PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons'),
+        VERSION='0.0.1-dev4'
     )
 
     CORS(app)
@@ -86,6 +88,7 @@ def create_app():
         return render_template('register_local.html', form=local_plugin)
 
     @app.route('/site-config', methods=['GET','POST'])
+    @admin_login_required
     @authorize
     def site_config():
         dbconn = db.get_db()
@@ -106,11 +109,7 @@ def create_app():
                 sitedata['copyrights'] = item.value
 
         config = form.RegisterSiteConfigForm(site_name=sitedata['site_name'], site_slogan=sitedata['site_slogan'],
-                                             page_title=sitedata['page_title'], copyrigths=sitedata['copyrights'])
-        if sitedata['copyrights'] == 'no':
-            config.copyrights.data = False
-        else:
-            config.copyrights.data = True
+                                             page_title=sitedata['page_title'], copyrights=sitedata['copyrights'])
 
         if config.validate_on_submit():
             uploaded_file = config.site_logo.data
@@ -127,11 +126,7 @@ def create_app():
             dbconn.query(db.Configs).filter(db.Configs.key == 'site_name').update({'value': config.site_name.data})
             dbconn.query(db.Configs).filter(db.Configs.key == 'site_slogan').update({'value': config.site_slogan.data})
             dbconn.query(db.Configs).filter(db.Configs.key == 'page_title').update({'value': config.page_title.data})
-            if request.form.get('copyrights') == 'y':
-                copyrights_string = 'yes'
-            else:
-                copyrights_string = 'no'
-            dbconn.query(db.Configs).filter(db.Configs.key == 'copyrights').update({'value': copyrights_string})
+            dbconn.query(db.Configs).filter(db.Configs.key == 'copyrights').update({'value': config.copyrights.data})
 
             dbconn.commit()
 
@@ -151,27 +146,31 @@ def create_app():
         session.pop('user_id', None)
         session.pop('username', None)
         session.pop('password', None)
+        session.pop('role', None)
+        session.pop('status', None)
 
         return redirect(url_for('login'))
 
     @app.route('/myaccount', methods=['GET', 'POST'])
     @authorize
     def myaccount():
-        if request.args.get('plugins') == 'recreate':
-            reload()
-            flash('Plugins cache reloaded successfully. Refresh this page again.', 'success')
-            return redirect(url_for('myaccount', token=securetoken()))
-
-        else:
-            dbconn = db.get_db()
-            myaccount = form.MyaccountForm()
-            if myaccount.validate_on_submit():
-                dbconn.query(db.Users).filter(db.Users.id == session['user_id']).update({'password': myaccount.confirm.data})
-                dbconn.commit()
-                flash('Password updated successfully.', 'success')
-                return redirect(url_for('logout'))
+        dbconn = db.get_db()
+        myaccount = form.MyaccountForm()
+        if myaccount.validate_on_submit():
+            dbconn.query(db.Users).filter(db.Users.id == session['user_id']).update({'password': myaccount.confirm.data})
+            dbconn.commit()
+            flash('Password updated successfully.', 'success')
+            return redirect(url_for('logout'))
 
         return render_template('myaccount.html', form=myaccount)
+
+    @app.route('/plugins-cache-recreate', methods=['GET', 'POST'])
+    @admin_login_required
+    @authorize
+    def plugins_cache_recreate():
+        reload()
+        flash('Plugins cache reloaded successfully. Refresh this page again.', 'success')
+        return redirect(url_for('myaccount', token=securetoken()))
 
     @app.route('/plugins')
     @authorize
@@ -185,7 +184,49 @@ def create_app():
 
         return render_template('plugins.html', plugins=results)
 
+    @app.route('/create-user', methods=['GET', 'POST'])
+    @admin_login_required
+    @authorize
+    def create_user():
+        dbconn = db.get_db()
+
+        if request.args.get('id'):
+            user = dbconn.query(db.Users).filter(db.Users.id == request.args.get('id'))
+            userdata = user.first()
+            createuser = form.CreateUserForm(username=userdata.password, password=userdata.password, confirm=userdata.password,
+                                             role=userdata.role, status=userdata.status)
+        else:
+            createuser = form.CreateUserForm()
+
+        if createuser.validate_on_submit():
+            try:
+                adduser = db.Users(username=createuser.username.data, password=createuser.password.data,
+                                   role=createuser.role.data, status=createuser.status.data)
+                dbconn.add(adduser)
+                dbconn.commit()
+                flash('User created successfully.', 'success')
+
+            except:
+                dbconn.rollback()
+                if request.args.get('id'):
+                    user.update({'password': createuser.password.data, 'role': createuser.role.data, 'status': createuser.status.data})
+                    dbconn.commit()
+                    flash('User updated successfully.', 'success')
+
+            redirect(url_for('create_user'))
+
+        return render_template('create_user.html', form=createuser)
+
+    @app.route('/list-users')
+    @admin_login_required
+    @authorize
+    def list_users():
+        dbconn = db.get_db()
+        list_users = dbconn.query(db.Users).all()
+        return render_template('list_users.html', users=list_users)
+
     @app.route('/plugin-activation/<string:status>/<int:pid>')
+    @admin_login_required
     @authorize
     def plugin_activation(status, pid):
         pstatus = {'installed': 1, 'uninstalled': 2, 'pending': 0}
@@ -198,15 +239,18 @@ def create_app():
     def login():
         if request.method == 'POST':
             dbconn = db.get_db()
-            getuser = dbconn.query(db.Users).filter(db.Users.username == request.form['username'] and
-                                                    db.Users.password == request.form['password']).first()
+            getuser = dbconn.query(db.Users).filter((db.Users.username == request.form['username']) &
+                                                    (db.Users.password == request.form['password']) &
+                                                    (db.Users.status == 'enabled')).first()
             if getuser:
                 session['user_id'] = getuser.id
                 session['username'] = getuser.username
                 session['password'] = getuser.password
-                return redirect(
-                    url_for('plugins')
-                )
+                session['role'] = getuser.role
+                session['status'] = getuser.status
+
+                return redirect(url_for('plugins'))
+
             else:
                 flash('Login failed. Please try again.', 'error')
                 return redirect(request.url)
@@ -214,7 +258,7 @@ def create_app():
         return render_template('login.html')
 
     @app.context_processor
-    def username():
+    def context():
         dbconn = db.get_db()
         siteconfig = dbconn.query(db.Configs).all()
         site_context = {}
@@ -230,9 +274,23 @@ def create_app():
                 site_context['page_title'] = item.value
             elif item.key == 'copyrights':
                 site_context['copyrights'] = item.value
+            elif item.key == 'available_version':
+                site_context['available_version'] = item.value
+            elif item.key == 'available_version_check_date':
+                site_context['available_version_check_date'] = item.value
 
         if 'username' in session:
             site_context['username'] = session['username']
+            site_context['role'] = session['role']
+            site_context['status'] = session['status']
+
+        duration = datetime.today() - datetime.strptime(site_context['available_version_check_date'], '%Y-%m-%d %H:%M:%S.%f')
+
+        if duration.days > 5:
+            check_new_version()
+
+        site_context['version'] = app.config['VERSION']
+        site_context['available_version'] = site_context['available_version']
 
         return site_context
 

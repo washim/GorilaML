@@ -2,7 +2,8 @@ import os
 from werkzeug.utils import secure_filename
 from zipfile import ZipFile
 from flask import current_app, session
-from wtforms import StringField, PasswordField, BooleanField, validators, ValidationError
+from wtforms import StringField, PasswordField, SelectField, BooleanField, validators, ValidationError
+from wtforms.widgets import PasswordInput
 from flask_wtf import FlaskForm, file
 from flask_wtf.csrf import CSRFProtect
 csrf = CSRFProtect()
@@ -71,9 +72,19 @@ class MyaccountForm(FlaskForm):
     confirm = PasswordField('Repeat Password', [validators.DataRequired()])
 
 
+class CreateUserForm(FlaskForm):
+    username = StringField('Username', [validators.DataRequired()])
+    password = PasswordField('New Password', [validators.DataRequired(),
+                                              validators.EqualTo('confirm', message='Passwords must match')],
+                             widget=PasswordInput(hide_value=False))
+    confirm = PasswordField('Repeat Password', [validators.DataRequired()], widget=PasswordInput(hide_value=False))
+    role = SelectField('User role', choices=[('developer', 'Developer'), ('admin', 'Administrator')])
+    status = SelectField('Status', choices=[('enabled', 'Enable'), ('disabled', 'Disable')])
+
+
 class RegisterSiteConfigForm(FlaskForm):
     site_name = StringField('Site name', [validators.DataRequired()])
     site_slogan = StringField('Site slogan', [validators.DataRequired()])
     site_logo = file.FileField('Site logo', [file.FileAllowed(['png', 'jpeg', 'jpg', 'gif'])])
     page_title = StringField('Page title', [validators.DataRequired()])
-    copyrights = BooleanField('Enable/Disable Copyrights footer')
+    copyrights = SelectField('Copyrights footer', choices=[('yes', 'Enabled'), ('no', 'Disabled')])

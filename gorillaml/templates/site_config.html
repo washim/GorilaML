@@ -1,62 +1,14 @@
+{% import '_widget.html' as widget %}
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="col-md-12">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Site Configurations</h3>
-        </div>
-        <div class="card-body">
-            <form id="form_site_config" role="form" method="POST" enctype="multipart/form-data" action="{{ url_for('site_config') }}">
-                {{ form.csrf_token }}
-                <table cellpadding='5'>
-                    <tr>
-                        <td>{{ form.site_logo.label }}</td>
-                        <td><img src="/static/img/{{ context.site_logo }}" class="brand-image img-circle elevation-3"> {{ form.site_logo }}</td>
-                        <td>
-                            {% for message in form.site_logo.errors %}
-                                <div>{{ message }}</div>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{{ form.site_name.label }} {% if form.site_name.flags.required %}*{% endif %}</td>
-                        <td>{{ form.site_name(class_="form-control") }}</td>
-                        <td>
-                            {% for message in form.site_name.errors %}
-                                <div>{{ message }}</div>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{{ form.site_slogan.label }} {% if form.site_slogan.flags.required %}*{% endif %}</td>
-                        <td>{{ form.site_slogan(class_="form-control") }}</td>
-                        <td>
-                            {% for message in form.site_slogan.errors %}
-                                <div>{{ message }}</div>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{{ form.page_title.label }} {% if form.page_title.flags.required %}*{% endif %}</td>
-                        <td>{{ form.page_title(class_="form-control") }}</td>
-                        <td>
-                            {% for message in form.page_title.errors %}
-                                <div>{{ message }}</div>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{{ form.copyrights.label }}</td>
-                        <td>{{ form.copyrights }}</td>
-                        <td></td>
-                    </tr>
-                </table>
-            </form>
-        </div>
-        <div class="card-footer">
-            <button type="submit" class="btn btn-primary" frmtarget="#form_site_config">Save Config</button>
-        </div>
-    </div>
-</div>
+
+{% set footer %}
+<button type="submit" class="btn btn-primary" frmtarget="#form_site_config">Save Config</button>
+{% endset %}
+
+{% call widget.gcard('Site Configurations', footer) %}
+{{ widget.gform('form_site_config', url_for('site_config'), form, ['site_logo','site_name', 'site_slogan', 'page_title', 'copyrights'], form_enctype='Yes') }}
+{% endcall %}
+
 {% endblock %}

@@ -1,0 +1,39 @@
+{% macro gcard(title, footer=None, class=None) -%}
+<div class="col-md-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">{{ title }}</h3>
+        </div>
+        <div class="card-body {{ class }}">
+            {{ caller() }}
+        </div>
+        {% if footer %}
+        <div class="card-footer">
+            {{ footer|safe }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{%- endmacro %}
+
+{% macro gform(form_id, form_action, form=None, fields=None, form_methods='POST', fields_content=None, form_enctype=None) %}
+<form id="{{ form_id }}" role="form" {% if form_enctype %}enctype="multipart/form-data" {% endif %}method="{{ form_methods }}" action="{{ form_action }}">
+    {% if fields %}
+    {{ form.csrf_token }}
+    <table cellpadding="5">
+        {% for field in fields %}
+        <tr>
+            <td>{{ form[field].label }} {% if form[field].flags.required %}*{% endif %}</td>
+            <td>{{ form[field](class_="form-control") }}</td>
+            <td>
+                {% for message in form[field].errors %}
+                    <div>{{ message }}</div>
+                {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+    {% if fields_content %} {{ fields_content }} {% endif %}
+</form>
+{%- endmacro %}

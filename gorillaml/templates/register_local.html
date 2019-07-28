@@ -1,39 +1,14 @@
+{% import '_widget.html' as widget %}
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="col-md-12">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Register your plugin from your local machine</h3>
-        </div>
-        <div class="card-body">
-            <form id="form_register_plugin" role="form" method="POST" action="{{ request.url }}">
-                {{ form.csrf_token }}
-                <table cellpadding="5">
-                    <tr>
-                        <td>{{ form.local_plugin_name.label }}</td>
-                        <td>{{ form.local_plugin_name(class_="form-control") }}</td>
-                        <td>
-                            {% for message in form.local_plugin_name.errors %}
-                                <div>{{ message }}</div>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{{ form.local_plugin_path.label }}</td>
-                        <td>{{ form.local_plugin_path(class_="form-control") }}</td>
-                        <td>
-                            {% for message in form.local_plugin_path.errors %}
-                                <div>{{ message }}</div>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                </table>
-            </form>
-        </div>
-        <div class="card-footer">
-            <button type="submit" class="btn btn-primary" frmtarget="#form_register_plugin">Register</button>
-        </div>
-    </div>
-</div>
+
+{% set footer %}
+<button type="submit" class="btn btn-primary" frmtarget="#form_register_plugin">Register</button>
+{% endset %}
+
+{% call widget.gcard('Register your plugin from your local machine', footer) %}
+{{ widget.gform('form_register_plugin', request.url, form, ['local_plugin_name','local_plugin_path']) }}
+{% endcall %}
+
 {% endblock %}
