@@ -5,7 +5,7 @@ with open('README.txt') as f:
 
 setup(
     name='gorillaml',
-    version='0.0.1-dev4',
+    version='0.0.1-dev5',
     packages=['gorillaml'],
     license='MIT license',
     url="https://www.gorillaml.com",
@@ -27,12 +27,13 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'gorillaml-canvas=gorillaml:cli'
+            'gorillaml-canvas=gorillaml:cli',
+            'gorillaml-start-server=gorillaml:start_server'
         ],
     },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
+        "Operating System :: OS Independent"
     ]
 )

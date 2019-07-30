@@ -2,12 +2,11 @@ import base64
 import time, requests
 from functools import wraps
 from flask import (
-    session, flash, redirect, url_for, request, current_app
+    session, flash, redirect, url_for, request
 )
 from gorillaml import db
 from bs4 import BeautifulSoup
 from datetime import datetime
-from gorillaml.reloader import last_reloaded
 
 
 def authorize(fun):
@@ -59,12 +58,6 @@ def admin_login_required(fun):
 
 def securetoken():
     return base64.b64encode((str(session['user_id'])+':'+session['username']+':'+session['password']).encode())
-
-
-def reload():
-    fp = open(f'{current_app.root_path}/reloader.py', 'w+')
-    fp.write(f"last_reloaded='{time.time()}'")
-    fp.close()
 
 
 def check_new_version():

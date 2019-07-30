@@ -30,6 +30,7 @@ class Plugins(Base):
     name = Column('name', String, nullable=False)
     plugin_path = Column('plugin_path', String, nullable=False, default='system')
     status = Column('status', Integer, nullable=False, default=0)
+    plugin_error = Column('plugin_error', String, nullable=False, default='No error found yet')
     created = Column('created', Date, nullable=False, default=datetime.now)
     user = relationship('Users', back_populates='plugins')
 

@@ -11,8 +11,11 @@
             <th>Status</th>
             <th>Plugin Path</th>
             <th>Uploaded By</th>
+            <th>Error</th>
             <th>Created</th>
+            {% if role == 'admin' %}
             <th>Installed/Uninstalled</th>
+            {% endif %}
         </tr>
         {% if plugins|length > 0 %}
         {% for plugin in plugins %}
@@ -22,7 +25,9 @@
             <td>{% if plugin.status == 1 %}<span class="badge bg-success">Enabled</span>{% elif plugin.status == 2 %}<span class="badge bg-danger">Disabled</span>{% else %}<span class="badge bg-warning">Pending Approval</span>{% endif %}</td>
             <td>{{ plugin.plugin_path }}</td>
             <td>{{ plugin.user.username }}</td>
+            <td>{{ plugin.plugin_error }}</td>
             <td>{{ plugin.created }}</td>
+            {% if role == 'admin' %}
             <td>
                 {% if plugin.status == 1 %}
                 <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
@@ -41,6 +46,7 @@
                 </div>
                 {% endif %}
             </td>
+            {% endif %}
         </tr>
         {% endfor %}
         {% else %}
