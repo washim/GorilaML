@@ -5,7 +5,7 @@ with open('README.txt') as f:
 
 setup(
     name='gorillaml',
-    version='0.0.1-dev0',
+    version='0.0.1-dev5',
     packages=['gorillaml'],
     license='MIT license',
     url="https://www.gorillaml.com",
@@ -21,16 +21,19 @@ setup(
         'Werkzeug>=0.15.5',
         'Flask-Cors>=3.0.8',
         'SQLAlchemy>=1.3.6',
-        'click>=7.0'
+        'click>=7.0',
+        'watchdog>=0.9.0',
+        'beautifulsoup4>=4.8.0 '
     ],
     entry_points={
         'console_scripts': [
-            'gorillaml-canvas=gorillaml:cli'
+            'gorillaml-canvas=gorillaml:cli',
+            'gorillaml-start-server=gorillaml:start_server'
         ],
     },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
+        "Operating System :: OS Independent"
     ]
 )

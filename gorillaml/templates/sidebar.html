@@ -1,0 +1,59 @@
+<div class="sidebar">
+    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="image">
+            <img src="{{ url_for('static', filename='img/avatar.png') }}" class="img-circle elevation-2" alt="User Image">
+        </div>
+        <div class="info">
+            <a href="#" class="d-block">{{ username }}</a>
+        </div>
+    </div>
+
+    <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            <li class="nav-item has-treeview menu-open">
+                <a href="#" class="nav-link">
+                    <i class="nav-icon fas fa-th"></i> <p>Dashboard<i class="right fas fa-angle-left"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link">
+                            <i class="fas fa-home nav-icon"></i> <p>Home</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('plugins') }}" class="nav-link">
+                            <i class="fas fa-plug nav-icon"></i> <p>Plugins</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('plugin_upload') }}" class="nav-link">
+                            <i class="fas fa-upload nav-icon"></i> <p>Plugin Upload</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('register_local') }}" class="nav-link">
+                            <i class="fas fa-cash-register nav-icon"></i> <p>Local Plugin Register</p>
+                        </a>
+                    </li>
+                    {% if role == 'admin' %}
+                    <li class="nav-item">
+                        <a href="{{ url_for('site_config') }}" class="nav-link">
+                            <i class="fas fa-compress nav-icon"></i> <p>Site Configs</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('create_user') }}" class="nav-link">
+                            <i class="fas fa-user nav-icon"></i> <p>Create User</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('list_users') }}" class="nav-link">
+                            <i class="fas fa-users nav-icon"></i> <p>List Users</p>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</div>

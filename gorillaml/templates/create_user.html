@@ -1,0 +1,14 @@
+{% import '_widget.html' as widget %}
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% set footer %}
+<button type="Create" class="btn btn-primary" frmtarget="#form_register_user">Register</button>
+{% endset %}
+
+{% call widget.gcard('Create new user', footer, '') %}
+{{ widget.gform('form_register_user', request.url, form, ['username','password','confirm','role','status']) }}
+{% endcall %}
+
+{% endblock %}

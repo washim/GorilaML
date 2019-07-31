@@ -1,0 +1,33 @@
+{% import '_widget.html' as widget %}
+{% extends 'base.html' %}
+
+{% block content %}
+{% call widget.gcard('Site Users', class='p-0') %}
+<table class="table">
+    <tbody>
+        <tr>
+            <th style="width: 10px">#</th>
+            <th>User name</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Created</th>
+        </tr>
+        {% if users|length > 0 %}
+        {% for user in users %}
+        <tr>
+            <td><a href="{{ url_for('create_user', id=user.id) }}">{{ user.id }}</a></td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.role }}</td>
+            <td>{% if user.status == 'enabled' %}<span class="badge bg-success">Enabled</span>{% else %}<span class="badge bg-danger">Disabled</span>{% endif %}</td>
+            <td>{{ user.created }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="5" align="center">No users found yet.</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+{% endcall %}
+{% endblock %}

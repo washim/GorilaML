@@ -1,1 +1,1 @@
-GorilaML model management system
+Gorila Managed Lab

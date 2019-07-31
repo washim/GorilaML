@@ -1,0 +1,14 @@
+{% import '_widget.html' as widget %}
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% set footer %}
+<button type="submit" class="btn btn-primary" frmtarget="#form_site_config">Save Config</button>
+{% endset %}
+
+{% call widget.gcard('Site Configurations', footer) %}
+{{ widget.gform('form_site_config', url_for('site_config'), form, ['site_logo','site_name', 'site_slogan', 'page_title', 'copyrights'], form_enctype='Yes') }}
+{% endcall %}
+
+{% endblock %}
