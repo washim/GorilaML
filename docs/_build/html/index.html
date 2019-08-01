@@ -86,6 +86,9 @@
               <div class="local-toc"><ul>
 <li><a class="reference internal" href="#">Welcome to GorillaML’s documentation!</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#db-initialization">DB Initialization</a></li>
+<li><a class="reference internal" href="#start-application-server">Start Application Server</a></li>
+<li><a class="reference internal" href="#application-login">Application Login</a></li>
 </ul>
 </div>
             
@@ -161,6 +164,30 @@
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install gorillaml
 </pre></div>
 </div>
+</div>
+<div class="section" id="db-initialization">
+<h1>DB Initialization<a class="headerlink" href="#db-initialization" title="Permalink to this headline">¶</a></h1>
+<p>After installation to initialized the application database we have to run below command in console.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>gorillaml-canvas init-db
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Dont ignore or forget to run this command or else application stop working properly.</p>
+</div>
+</div>
+<div class="section" id="start-application-server">
+<h1>Start Application Server<a class="headerlink" href="#start-application-server" title="Permalink to this headline">¶</a></h1>
+<p>To start GorillaML server run below command in terminal</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>gorillaml-start-server
+</pre></div>
+</div>
+<p>It will expose the application in <a class="reference external" href="http://127.0.0.1:5000">http://127.0.0.1:5000</a></p>
+</div>
+<div class="section" id="application-login">
+<h1>Application Login<a class="headerlink" href="#application-login" title="Permalink to this headline">¶</a></h1>
+<p>Default username and password of the application is <code class="docutils literal notranslate"><span class="pre">admin</span></code> and <code class="docutils literal notranslate"><span class="pre">admin</span></code>. After successfull login change your default
+password as per your convenient time.</p>
 </div>
 
 
