@@ -2,11 +2,11 @@ import os
 import sys
 import click
 import importlib
+import subprocess
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from flask.cli import FlaskGroup
-from werkzeug.serving import run_simple
 from gorillaml import db
 from gorillaml import form
 from gorillaml.lab import (
@@ -16,15 +16,13 @@ from flask import (
     Flask, render_template, request, flash, redirect, url_for, session
 )
 
-to_reload = False
 
-
-def get_app():
+def create_app():
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY=os.urandom(12),
         PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons'),
-        VERSION='0.0.1-dev5'
+        VERSION='0.0.1'
     )
 
     CORS(app)
@@ -149,9 +147,11 @@ def get_app():
     @admin_login_required
     @authorize
     def plugins_cache_recreate():
-        global to_reload
-        to_reload = True
-        return redirect(url_for('reauth', token=securetoken()))
+        shutdown = request.environ.get('werkzeug.server.shutdown')
+        if shutdown:
+            shutdown()
+
+        return ''
 
     @app.route('/plugin-activation/<string:status>/<int:pid>')
     @admin_login_required
@@ -257,7 +257,7 @@ def get_app():
             flash('Password updated successfully.', 'success')
             return redirect(url_for('logout'))
 
-        return render_template('myaccount.html', form=myaccount)
+        return render_template('myaccount.html', form=myaccount, token=securetoken())
 
     @app.route('/logout')
     @authorize
@@ -323,9 +323,6 @@ def get_app():
                     bp = getattr(plugin_libs, 'gorillaml')
                     app.register_blueprint(bp)
 
-                    dbconn.query(db.Plugins).filter(db.Plugins.name == plugin.name).update({'plugin_error': 'No error found yet'})
-                    dbconn.commit()
-
                 else:
                     if plugin.plugin_path not in sys.path:
                         sys.path.append(plugin.plugin_path)
@@ -334,41 +331,18 @@ def get_app():
                     bp = getattr(plugin_libs, 'gorillaml')
                     app.register_blueprint(bp)
 
-                    dbconn.query(db.Plugins).filter(db.Plugins.name == plugin.name).update({'plugin_error': 'No error found yet'})
-                    dbconn.commit()
-
             except Exception as e:
-                dbconn.rollback()
-                dbconn.query(db.Plugins).filter(db.Plugins.name == plugin.name).update({'plugin_error': str(e)})
-                dbconn.commit()
+                pass
 
     return app
 
 
-class Serve(object):
-    def __init__(self, create_app):
-        self.create_app = create_app
-        self.app = create_app()
-
-    def get_application(self):
-        global to_reload
-        if to_reload:
-            self.app = self.create_app()
-            to_reload = False
-
-        return self.app
-
-    def __call__(self, environ, start_response):
-        app = self.get_application()
-
-        return app(environ, start_response)
-
-
-@click.group(cls=FlaskGroup, create_app=get_app)
+@click.group(cls=FlaskGroup, create_app=create_app)
 def cli():
-    pass
+    os.environ['FLASK_ENV'] = 'development'
 
 
 @click.command()
 def start_server():
-    run_simple('127.0.0.1', 5000, Serve(get_app), use_reloader=False, use_debugger=False, use_evalex=False)
+    while True:
+        subprocess.run(["gorillaml-canvas", "run"])

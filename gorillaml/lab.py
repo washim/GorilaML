@@ -1,8 +1,9 @@
 import base64
-import time, requests
+import requests
+import time
 from functools import wraps
 from flask import (
-    session, flash, redirect, url_for, request
+    session, flash, redirect, url_for, request, current_app
 )
 from gorillaml import db
 from bs4 import BeautifulSoup

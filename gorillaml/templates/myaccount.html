@@ -1,24 +1,34 @@
-{% import '_widget.html' as widget %}
 {% extends 'base.html' %}
 
 {% block content %}
-
+<div class="row">
     {% set footer %}
     <button type="Create" class="btn btn-primary" frmtarget="#form_change_password">Change Password</button>
     {% endset %}
 
-    {% set fields_content %}
-    <button type="submit" class="btn btn-danger btn-primary">Recreate</button>
-    {% endset %}
-
-    {% call widget.gcard('Create new user', footer, '') %}
+    {% call widget.gcard(title='Create new user', footer=footer) %}
     {{ widget.gform('form_change_password', url_for('myaccount'), form, ['current_password','password','confirm']) }}
     {% endcall %}
 
     {% if role == 'admin' %}
-        {% call widget.gcard('Recreate Plugins Cache') %}
-        {{ widget.gform('form_plugins_recreate', url_for('plugins_cache_recreate'), form_methods='GET', fields_content=fields_content) }}
+        {% call widget.gcard(title='Recreate Plugins Cache') %}
+        <div class="loading-plugins-cache"><button class="btn btn-danger btn-recreate">Recreate</button></div>
         {% endcall %}
     {% endif %}
+</div>
+{% endblock %}
 
+{% block javascript %}
+$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+$('.btn-recreate').bind('click', function() {
+    $.get($SCRIPT_ROOT + '/plugins-cache-recreate', function(data) {
+        $('.loading-plugins-cache').html('<i class="fas fa-sync fa-spin"></i> &nbsp;Please wait and dont refresh the page.')
+        setTimeout(function(){
+            var url = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
+            var mytoken = "{{token|safe}}"
+            window.location.href = url + "/reauth?token=" + mytoken.replace("b'","").replace("'","");
+        }, 5000);
+    });
+    return false;
+});
 {% endblock %}

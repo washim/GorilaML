@@ -2,7 +2,7 @@ import os
 from werkzeug.utils import secure_filename
 from zipfile import ZipFile
 from flask import current_app, session
-from wtforms import StringField, PasswordField, SelectField, BooleanField, validators, ValidationError
+from wtforms import StringField, PasswordField, SelectField, validators, ValidationError
 from wtforms.widgets import PasswordInput
 from flask_wtf import FlaskForm, file
 from flask_wtf.csrf import CSRFProtect
@@ -28,17 +28,6 @@ def plugin_validate(form, field):
             zip.extractall(user_folder)
 
         os.remove(file_path)
-
-    if os.path.isdir(os.path.join(user_folder, parse_file_name[0])) == False:
-        raise ValidationError('Plugin folder name insize zip file should be same as zip file name')
-
-
-def site_logo_validate(form, field):
-    uploaded_file = field.data
-    filename = secure_filename(uploaded_file.filename)
-
-    file_path = os.path.join(current_app.instance_path, filename)
-    uploaded_file.save(file_path)
 
     if os.path.isdir(os.path.join(user_folder, parse_file_name[0])) == False:
         raise ValidationError('Plugin folder name insize zip file should be same as zip file name')

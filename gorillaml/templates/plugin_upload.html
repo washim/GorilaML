@@ -1,14 +1,13 @@
-{% import '_widget.html' as widget %}
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="row">
+    {% set footer %}
+    <button type="submit" class="btn btn-primary" frmtarget="#form_addon_upload">Upload</button>
+    {% endset %}
 
-{% set footer %}
-<button type="submit" class="btn btn-primary" frmtarget="#form_addon_upload">Upload</button>
-{% endset %}
-
-{% call widget.gcard('Upload your plugin', footer, '') %}
-{{ widget.gform('form_addon_upload', request.url, form, ['upload'], form_enctype='Yes') }}
-{% endcall %}
-
+    {% call widget.gcard(title='Upload your plugin', footer=footer) %}
+    {{ widget.gform('form_addon_upload', request.url, form, ['upload'], form_enctype='Yes') }}
+    {% endcall %}
+</div>
 {% endblock %}

@@ -1,14 +1,13 @@
-{% import '_widget.html' as widget %}
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="row">
+    {% set footer %}
+    <button type="submit" class="btn btn-primary" frmtarget="#form_register_plugin">Register</button>
+    {% endset %}
 
-{% set footer %}
-<button type="submit" class="btn btn-primary" frmtarget="#form_register_plugin">Register</button>
-{% endset %}
-
-{% call widget.gcard('Register your plugin from your local machine', footer) %}
-{{ widget.gform('form_register_plugin', request.url, form, ['local_plugin_name','local_plugin_path']) }}
-{% endcall %}
-
+    {% call widget.gcard(title='Register your plugin from your local machine', footer=footer) %}
+    {{ widget.gform('form_register_plugin', request.url, form, ['local_plugin_name','local_plugin_path']) }}
+    {% endcall %}
+</div>
 {% endblock %}

@@ -1,3 +1,4 @@
+{% import '_widget.html' as widget %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,41 +43,42 @@
 
             <div class="content">
                 <div class="container-fluid">
+                    {% with messages = get_flashed_messages(category_filter=["error"]) %}
+                    {% if messages %}
                     <div class="row">
-                        {% with messages = get_flashed_messages(category_filter=["error"]) %}
-                        {% if messages %}
-                        <div class="col-md-12">
-                            
-                            <div class="alert alert-danger alert-dismissible">
-                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                                <h5><i class="icon fas fa-ban"></i> Error!</h5>
-                                <ul>
-                                    {% for msg in messages %}
-                                    <li>{{ msg }}</li>
-                                    {% endfor %}
-                                </ul>
-                                
-                            </div>
+                    <div class="col-md-12">
+                        <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            <h5><i class="icon fas fa-ban"></i> Error!</h5>
+                            <ul>
+                                {% for msg in messages %}
+                                <li>{{ msg }}</li>
+                                {% endfor %}
+                            </ul>
+
                         </div>
-                        {% endif %}
-                        {% endwith %}
-                        {% with messages = get_flashed_messages(category_filter=["success"]) %}
-                        {% if messages %}
-                        <div class="col-md-12">
-                            <div class="alert alert-info alert-dismissible">
-                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                                <h5><i class="icon fas fa-check"></i> Success!</h5>
-                                <ul>
-                                    {% for msg in messages %}
-                                    <li>{{ msg }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
-                        {% endif %}
-                        {% endwith %}
-                        {% block content %}{% endblock %}
                     </div>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                    {% with messages = get_flashed_messages(category_filter=["success"]) %}
+                    {% if messages %}
+                    <div class="row">
+                    <div class="col-md-12">
+                        <div class="alert alert-info alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            <h5><i class="icon fas fa-check"></i> Success!</h5>
+                            <ul>
+                                {% for msg in messages %}
+                                <li>{{ msg }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                    {% block content %}{% endblock %}
                 </div>
             </div>
         </div>
@@ -90,9 +92,11 @@
         $('.btn-primary').bind('click', function() {
             $($(this).attr('frmtarget')).submit();
         });
+
         $('.custom-control-input').bind('click', function() {
             $(location).attr('href', $(this).attr('url'));
         });
+        {% block javascript %}{% endblock %}
     });
     </script>
 </body>

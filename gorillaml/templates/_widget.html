@@ -1,10 +1,10 @@
-{% macro gcard(title, footer=None, class=None) -%}
-<div class="col-md-12">
-    <div class="card">
+{% macro gcard(title, class='col-md-12', body_class=None, type=None, footer=None) -%}
+<div class="{{ class }}">
+    <div class="card {{ type }}">
         <div class="card-header">
             <h3 class="card-title">{{ title }}</h3>
         </div>
-        <div class="card-body {{ class }}">
+        <div class="card-body {{ body_class }}">
             {{ caller() }}
         </div>
         {% if footer %}
@@ -23,11 +23,11 @@
     <table cellpadding="5">
         {% for field in fields %}
         <tr>
-            <td>{{ form[field].label }} {% if form[field].flags.required %}*{% endif %}</td>
+            <td>{{ form[field].label }} {% if form[field].flags.required %}<span class="text-danger">*</span>{% endif %}</td>
             <td>{{ form[field](class_="form-control") }}</td>
             <td>
                 {% for message in form[field].errors %}
-                    <div>{{ message }}</div>
+                    <div class="text-danger">{{ message }}</div>
                 {% endfor %}
             </td>
         </tr>
@@ -36,4 +36,42 @@
     {% endif %}
     {% if fields_content %} {{ fields_content }} {% endif %}
 </form>
+{%- endmacro %}
+
+{% macro gbox(title, value, class='col-lg-3 col-6', icon_class=None, type=None, url=None, footer=None) %}
+<div class="{{ class }}">
+    <div class="small-box {{ type }}">
+        <div class="inner">
+            <h3>{{ value }}</h3>
+            <p>{{ title }}</p>
+        </div>
+        <div class="icon"><i class="{{ icon_class }}"></i></div>
+        {% if footer %}
+        <a href="{{ url }}" class="small-box-footer">{{ footer }} <i class="fas fa-arrow-circle-right"></i></a>
+        {% endif %}
+    </div>
+</div>
+{%- endmacro %}
+
+{% macro gtable(fields, rows) %}
+<table class="table">
+    <tbody>
+        <tr>
+            {% for field in fields %}
+            <th>{{ field|capitalize }}</th>
+            {% endfor %}
+        </tr>
+        {% if rows|length > 0 %}
+            {% for row in rows %}
+            <tr>
+                {% for field in fields %}
+                <td>{{ row[field] }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        {% else %}
+        <tr><td colspan="{{ rows|length }}">No record found yet</td></tr>
+        {% endif %}
+    </tbody>
+</table>
 {%- endmacro %}
