@@ -23,11 +23,17 @@
     </form>
 
     <ul class="navbar-nav ml-auto">
+        {% if status %}
         <li class="nav-item d-none d-sm-inline-block">
             <a class="nav-link" href="{{ url_for('myaccount') }}">My Account</a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
             <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
         </li>
+        {% else %}
+        <li class="nav-item d-none d-sm-inline-block">
+            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+        </li>
+        {% endif %}
     </ul>
 </nav>

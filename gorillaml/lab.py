@@ -1,6 +1,5 @@
 import base64
 import requests
-import time
 from functools import wraps
 from flask import (
     session, flash, redirect, url_for, request, current_app

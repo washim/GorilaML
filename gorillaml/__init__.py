@@ -22,7 +22,7 @@ def create_app():
     app.config.from_mapping(
         SECRET_KEY=os.urandom(12),
         PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons'),
-        VERSION='0.0.1'
+        VERSION='0.0.3'
     )
 
     CORS(app)
@@ -296,6 +296,8 @@ def create_app():
             site_context['username'] = session['username']
             site_context['role'] = session['role']
             site_context['status'] = session['status']
+        else:
+            site_context['username'] = 'Anonymous'
 
         duration = datetime.today() - datetime.strptime(site_context['available_version_check_date'], '%Y-%m-%d %H:%M:%S.%f')
 
@@ -319,7 +321,7 @@ def create_app():
         for plugin in allplugins:
             try:
                 if plugin.plugin_path == 'system':
-                    plugin_libs = importlib.import_module('addons.%s.%s.api' % (plugin.user.username, plugin.name))
+                    plugin_libs = importlib.import_module('addons.%s.%s.plugin' % (plugin.user.username, plugin.name))
                     bp = getattr(plugin_libs, 'gorillaml')
                     app.register_blueprint(bp)
 
@@ -327,7 +329,7 @@ def create_app():
                     if plugin.plugin_path not in sys.path:
                         sys.path.append(plugin.plugin_path)
 
-                    plugin_libs = importlib.import_module('%s.api' % plugin.name)
+                    plugin_libs = importlib.import_module('%s.plugin' % plugin.name)
                     bp = getattr(plugin_libs, 'gorillaml')
                     app.register_blueprint(bp)
 

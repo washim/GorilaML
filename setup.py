@@ -5,7 +5,7 @@ with open('README.txt') as f:
 
 setup(
     name='gorillaml',
-    version='0.0.1',
+    version='0.0.3',
     packages=['gorillaml'],
     license='MIT license',
     url="https://www.gorillaml.com",
@@ -23,7 +23,8 @@ setup(
         'SQLAlchemy>=1.3.6',
         'click>=7.0',
         'watchdog>=0.9.0',
-        'beautifulsoup4>=4.8.0 '
+        'beautifulsoup4>=4.8.0',
+        'requests>=2.22.0'
     ],
     entry_points={
         'console_scripts': [
