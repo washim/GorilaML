@@ -43,4 +43,4 @@ GorillaML is created on top of Flask framework and this plugins are created base
 
 You will found sample plugins here https://github.com/washim/GorillaML_Plugins
 
-.. warning:: Plugin name and blueprint name should be same inside plugin.py. This `plugin.py` and `__init__.py` is the mandatory to create gorillaml plugins. Dont change `gorillaml` variable inside plugin.py
+.. warning:: Plugin name and blueprint name should be same inside plugin.py. This **plugin.py** and **__init__.py** is the mandatory to create gorillaml plugins. Dont change **gorillaml** variable inside plugin.py
