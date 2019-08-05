@@ -1,6 +1,6 @@
 Welcome to GorillaML's documentation!
 =====================================
-This is the application which allow individual, organization, developer, publisher to manage, publish, monitor webservices, machine learning api, custom forms and many more things collaborately.
+This is the application which allow individual, organization, developer, publisher to manage, publish, monitor webservices, machine learning api, custom forms and many more active development very easily.
 
 .. toctree::
    :maxdepth: 2
