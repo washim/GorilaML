@@ -1,6 +1,6 @@
 Welcome to GorillaML's documentation!
 =====================================
-This is the application which allow individual, organization, developer, publisher to manage, publish, monitor webservices, machine learning api, custom forms and many more things collaborately.
+This is the application which allow individual, organization, developer, publisher to manage, publish, monitor webservices, machine learning api, custom forms and many more active development very easily.
 
 .. toctree::
    :maxdepth: 2
@@ -36,3 +36,11 @@ Application Login
 =====================================
 Default username and password of the application is ``admin`` and ``admin``. After successfull login change your default
 password as per your convenient time.
+
+Plugin Development
+=====================================
+GorillaML is created on top of Flask framework and this plugins are created based on Flask blueprint framework. You have full controll to play with gorillaml plugins using Flask blueprint for more details start reading https://flask.palletsprojects.com/en/1.1.x/blueprints/
+
+You will found sample plugins here https://github.com/washim/GorillaML_Plugins
+
+.. warning:: Plugin name and blueprint name should be same inside plugin.py. This **plugin.py** and **__init__.py** is the mandatory to create gorillaml plugins. Dont change **gorillaml** variable inside plugin.py
