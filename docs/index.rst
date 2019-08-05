@@ -28,7 +28,7 @@ To start GorillaML server run below command in terminal
 
 .. code-block:: shell
 
-    gorillaml-start-server
+    gorillaml-forever
 
 It will expose the application in http://127.0.0.1:5000
 
