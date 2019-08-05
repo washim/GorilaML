@@ -36,3 +36,9 @@ Application Login
 =====================================
 Default username and password of the application is ``admin`` and ``admin``. After successfull login change your default
 password as per your convenient time.
+
+Plugin Development
+=====================================
+GorillaML is created based on Flask framework and this plugins created based on Flask blueprint framework. You have full controll to play with gorillaml plugins using Flask blueprint for more details start reading https://flask.palletsprojects.com/en/1.1.x/blueprints/
+
+You will found sample plugins here https://github.com/washim/GorillaML_Plugins
