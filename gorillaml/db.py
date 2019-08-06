@@ -1,4 +1,5 @@
 import click
+import subprocess
 from flask import g, current_app
 from flask.cli import with_appcontext
 from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey
@@ -84,6 +85,7 @@ def init_db():
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
+    app.cli.add_command(start_server)
 
 
 @click.command('init-db')
@@ -91,3 +93,9 @@ def init_app(app):
 def init_db_command():
     init_db()
     click.echo('Initialized the database.')
+
+
+@click.command('start-forever')
+def start_server():
+    while True:
+        subprocess.run(["gorillaml-canvas", "run"])

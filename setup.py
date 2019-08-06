@@ -5,10 +5,13 @@ with open('README.txt') as f:
 
 setup(
     name='gorillaml',
-    version='0.0.4',
+    version='0.0.5',
     packages=['gorillaml'],
     license='MIT license',
     url="https://www.gorillaml.com",
+    description='This is the application which allow individual, organization, developer, publisher to manage, '
+                'publish, monitor webservices, machine learning api, custom forms and many more active '
+                'development very easily.',
     long_description=long_description,
     author='Washim Ahmed',
     author_email='washim.ahmed@gmail.com',
@@ -29,8 +32,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'gorillaml-canvas=gorillaml:cli',
-            'gorillaml-forever=gorillaml:start_server'
+            'gorillaml-canvas=gorillaml:cli'
         ],
     },
     classifiers=[

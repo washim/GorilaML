@@ -2,7 +2,6 @@ import os
 import sys
 import click
 import importlib
-import subprocess
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
@@ -22,7 +21,7 @@ def create_app():
     app.config.from_mapping(
         SECRET_KEY=os.urandom(12),
         PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons'),
-        VERSION='0.0.4'
+        VERSION='0.0.5'
     )
 
     CORS(app)
@@ -169,7 +168,7 @@ def create_app():
         dbconn = db.get_db()
         name = request.args.get('name')
         if name:
-            results = dbconn.query(db.Plugins).filter(db.Plugins.name == name).all()
+            results = dbconn.query(db.Plugins).filter(db.Plugins.name.like(f'%{name}%')).all()
         else:
             results = dbconn.query(db.Plugins).all()
 
@@ -342,9 +341,3 @@ def create_app():
 @click.group(cls=FlaskGroup, create_app=create_app)
 def cli():
     os.environ['FLASK_ENV'] = 'production'
-
-
-@click.command()
-def start_server():
-    while True:
-        subprocess.run(["gorillaml-canvas", "run"])
