@@ -93,9 +93,10 @@
             $($(this).attr('frmtarget')).submit();
         });
 
-        $('.custom-control-input').bind('click', function() {
+        $('.plugin-status').on('click', function() {
             $(location).attr('href', $(this).attr('url'));
         });
+
         {% block javascript %}{% endblock %}
     });
     </script>

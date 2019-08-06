@@ -22,7 +22,7 @@ def create_app():
     app.config.from_mapping(
         SECRET_KEY=os.urandom(12),
         PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons'),
-        VERSION='0.0.3'
+        VERSION='0.0.4'
     )
 
     CORS(app)
@@ -341,7 +341,7 @@ def create_app():
 
 @click.group(cls=FlaskGroup, create_app=create_app)
 def cli():
-    os.environ['FLASK_ENV'] = 'development'
+    os.environ['FLASK_ENV'] = 'production'
 
 
 @click.command()

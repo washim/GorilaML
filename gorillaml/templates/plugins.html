@@ -28,20 +28,11 @@
                 {% if role == 'admin' %}
                 <td>
                     {% if plugin.status == 1 %}
-                    <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
-                      <input type="checkbox" class="custom-control-input" id="customSwitch3" url="{{ url_for('plugin_activation', status='uninstalled', pid=plugin.id) }}" checked>
-                      <label class="custom-control-label" for="customSwitch3">Installed</label>
-                    </div>
+                    <input type="checkbox" class="plugin-status" url="{{ url_for('plugin_activation', status='uninstalled', pid=plugin.id) }}" checked>
                     {% elif plugin.status == 2 %}
-                    <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
-                      <input type="checkbox" class="custom-control-input" id="customSwitch3" url="{{ url_for('plugin_activation', status='installed', pid=plugin.id) }}">
-                      <label class="custom-control-label" for="customSwitch3">Uninstalled</label>
-                    </div>
+                    <input type="checkbox" class="plugin-status" url="{{ url_for('plugin_activation', status='installed', pid=plugin.id) }}">
                     {% else %}
-                    <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
-                      <input type="checkbox" class="custom-control-input" id="customSwitch3" url="{{ url_for('plugin_activation', status='installed', pid=plugin.id) }}">
-                      <label class="custom-control-label" for="customSwitch3">Pending Approval</label>
-                    </div>
+                    <input type="checkbox" class="plugin-status" url="{{ url_for('plugin_activation', status='installed', pid=plugin.id) }}">
                     {% endif %}
                 </td>
                 {% endif %}

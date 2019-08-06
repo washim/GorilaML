@@ -1,5 +1,6 @@
 import base64
 import requests
+import io
 from functools import wraps
 from flask import (
     session, flash, redirect, url_for, request, current_app
@@ -58,6 +59,16 @@ def admin_login_required(fun):
 
 def securetoken():
     return base64.b64encode((str(session['user_id'])+':'+session['username']+':'+session['password']).encode())
+
+
+def fig_to_html(figure, size=100):
+    buffer = io.BytesIO()
+    figure.savefig(buffer, format='png')
+    buffer.seek(0)
+    raw_data = base64.b64encode(buffer.read()).decode('utf-8')
+    image = f'<image width="{size}%" src="data:image/png;base64,{raw_data}"/>'
+
+    return image
 
 
 def check_new_version():
