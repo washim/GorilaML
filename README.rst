@@ -24,7 +24,7 @@ To start GorillaML server run below command in terminal
 
 .. code-block:: python
 
-    gorillaml-forever
+    gorillaml-canvas start-forever
 
 It will expose the application in http://127.0.0.1:5000
 
