@@ -1,6 +1,7 @@
 import base64
 import requests
 import io
+import os
 from functools import wraps
 from flask import (
     session, flash, redirect, url_for, request, current_app
@@ -69,6 +70,18 @@ def fig_to_html(figure, size=100):
     image = f'<image width="{size}%" src="data:image/png;base64,{raw_data}"/>'
 
     return image
+
+def plugin_path(name, username):
+    user_folder = os.path.join(current_app.config['PLUGIN_UPLOAD_FOLDER'], username)
+    dbconn = db.get_db()
+    plugin = dbconn.query(db.Plugins).filter(db.Plugins.name == name).first()
+
+    if plugin.plugin_path == 'system':
+        installed_plugin_path = os.path.join(user_folder, name, 'static')
+    else:
+        installed_plugin_path = os.path.join(plugin.plugin_path, name, 'static')
+
+    return installed_plugin_path
 
 
 def check_new_version():

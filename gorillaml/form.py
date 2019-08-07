@@ -1,4 +1,5 @@
 import os
+import shutil
 from werkzeug.utils import secure_filename
 from zipfile import ZipFile
 from flask import current_app, session
@@ -19,15 +20,15 @@ def plugin_validate(form, field):
         os.mkdir(user_folder)
     
     if os.path.isdir(os.path.join(user_folder, parse_file_name[0])):
-        raise ValidationError('Plugin already exist. It should be unique for each upload')
-    else:
-        file_path = os.path.join(user_folder, filename)
-        uploaded_file.save(file_path)
+        shutil.rmtree(os.path.join(user_folder, parse_file_name[0]), ignore_errors=True)
 
-        with ZipFile(file_path, 'r') as zip:
-            zip.extractall(user_folder)
+    file_path = os.path.join(user_folder, filename)
+    uploaded_file.save(file_path)
 
-        os.remove(file_path)
+    with ZipFile(file_path, 'r') as zip:
+        zip.extractall(user_folder)
+
+    os.remove(file_path)
 
     if os.path.isdir(os.path.join(user_folder, parse_file_name[0])) == False:
         raise ValidationError('Plugin folder name insize zip file should be same as zip file name')

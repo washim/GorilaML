@@ -1,11 +1,11 @@
 from setuptools import setup
 
-with open('README.txt') as f:
+with open('README.rst') as f:
     long_description = f.read()
 
 setup(
     name='gorillaml',
-    version='0.0.5',
+    version='0.0.6',
     packages=['gorillaml'],
     license='MIT license',
     url="https://www.gorillaml.com",
