@@ -13,6 +13,7 @@ setup(
                 'publish, monitor webservices, machine learning api, custom forms and many more active '
                 'development very easily.',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     author='Washim Ahmed',
     author_email='washim.ahmed@gmail.com',
     python_requires='>=3',

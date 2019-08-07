@@ -2,13 +2,9 @@ Welcome to GorillaML's documentation!
 =====================================
 This is the application which allow individual, organization, developer, publisher to manage, publish, monitor webservices, machine learning api, custom forms and many more active development very easily.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
 Installation
 =====================================
-.. code-block:: shell
+.. code-block:: python
 
     pip install gorillaml
 
@@ -16,7 +12,7 @@ DB Initialization
 =====================================
 After installation to initialized the application database we have to run below command in console.
 
-.. code-block:: shell
+.. code-block:: python
 
     gorillaml-canvas init-db
 
@@ -26,7 +22,7 @@ Start Application Server
 =====================================
 To start GorillaML server run below command in terminal
 
-.. code-block:: shell
+.. code-block:: python
 
     gorillaml-forever
 
