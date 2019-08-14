@@ -5,7 +5,7 @@ with open('README.rst') as f:
 
 setup(
     name='gorillaml',
-    version='0.0.7',
+    version='0.0.8',
     packages=['gorillaml'],
     license='MIT license',
     url="https://www.gorillaml.com",
@@ -29,7 +29,8 @@ setup(
         'watchdog>=0.9.0',
         'beautifulsoup4>=4.8.0',
         'requests>=2.22.0',
-        'mpld3>=0.3'
+        'mpld3>=0.3',
+        'scipy>=1.3.1'
     ],
     entry_points={
         'console_scripts': [

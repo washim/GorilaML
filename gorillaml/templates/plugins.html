@@ -3,7 +3,7 @@
 {% block content %}
 <div class="row">
     {% call widget.gcard(title='All Plugins', body_class='p-0') %}
-    <table class="table">
+    <table class="table table-striped">
         <tbody>
             <tr>
                 <th style="width: 10px">#</th>
@@ -20,7 +20,7 @@
             {% for plugin in plugins %}
             <tr>
                 <td>{{ plugin.id }}</td>
-                <td>{{ plugin.name }}</td>
+                <td><a href="/{{ plugin.name }}">{{ plugin.name }}</a></td>
                 <td>{% if plugin.status == 1 %}<span class="badge bg-success">Enabled</span>{% elif plugin.status == 2 %}<span class="badge bg-danger">Disabled</span>{% else %}<span class="badge bg-warning">Pending Approval</span>{% endif %}</td>
                 <td>{{ plugin.plugin_path }}</td>
                 <td>{{ plugin.user.username }}</td>
