@@ -12,7 +12,7 @@
 
     {% if role == 'admin' %}
         {% call widget.gcard(title='Recreate Plugins Cache') %}
-        <div class="loading-plugins-cache"><button class="btn btn-danger btn-recreate">Recreate</button></div>
+        <div class="loading-plugins-cache" data-intro='You have to recreate plugin cache everytime when you made changes in code-base to see the changes.'><button class="btn btn-danger btn-recreate">Recreate</button></div>
         {% endcall %}
     {% endif %}
 </div>
@@ -24,9 +24,8 @@ $('.btn-recreate').bind('click', function() {
     $.get($SCRIPT_ROOT + '/plugins-cache-recreate', function(data) {
         $('.loading-plugins-cache').html('<i class="fas fa-sync fa-spin"></i> &nbsp;Please wait and dont refresh the page.')
         setTimeout(function(){
-            var url = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
             var mytoken = "{{token|safe}}"
-            window.location.href = url + "/reauth?token=" + mytoken.replace("b'","").replace("'","");
+            window.location.href = BASE_URL + "/reauth?token=" + mytoken.replace("b'","").replace("'","");
         }, 5000);
     });
     return false;

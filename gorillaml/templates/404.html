@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    {% call widget.gcard(title='Page not found') %}
+    Oops, either page not really exist or something went wrong in your plugins. Contact with administrator to recreate the plugins cache.
+    {% endcall %}
+</div>
+{% endblock %}

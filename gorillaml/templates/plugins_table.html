@@ -1,0 +1,30 @@
+<table class="table table-striped">
+    <tbody>
+        <tr>
+            <th style="width: 10px">#</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Plugin Path</th>
+            <th>By</th>
+            <th>Created</th>
+            {% if role == 'admin' %}<th>Action</th>{% endif %}
+        </tr>
+        {% if plugins|length > 0 %}
+        {% for plugin in plugins %}
+        <tr>
+            <td><a href="/{{ plugin.name }}" title="View this plugins"><i class="fas fa-eye"></i></a></td>
+            <td>{{ plugin.name }}</td>
+            <td>{% if plugin.status == 1 %}<span class="badge bg-success">Enabled</span>{% elif plugin.status == 2 %}<span class="badge bg-danger">Disabled</span>{% else %}<span class="badge bg-warning">Pending Approval</span>{% endif %}</td>
+            <td>{{ plugin.plugin_path }}</td>
+            <td>{{ plugin.user.username }}</td>
+            <td>{{ plugin.created }}</td>
+            {% if role == 'admin' %}<td>{% if plugin.status in [0,2] %}<a href="{{ url_for('plugin_activation', status='installed', pid=plugin.id) }}" title="Approve this plugin"><i class="fas fa-thumbs-up"></i></a> {% else %}<a href="{{ url_for('plugin_activation', status='uninstalled', pid=plugin.id) }}" title="Reject this plugin"><i class="fas fa-thumbs-down"></i></a>{% endif %} <a href="{{ url_for('plugin_activation', status='delete', pid=plugin.id) }}" title="Delete this plugin"><i class="fas fa-trash"></i></a></td>{% endif %}
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="{% if role == 'admin' %}7{% else %}6{% endif %}" align="center">No plugins found yet.</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>

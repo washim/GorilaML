@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    {% call widget.gcard(title='500 Internal Server Error') %}
+    {{ error|replace('500 Internal Server Error:','') }}
+    {% endcall %}
+</div>
+{% endblock %}

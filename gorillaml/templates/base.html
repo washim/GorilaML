@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='plugins/fontawesome-free/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ionicons.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/adminlte.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='plugins/intro/minified/introjs.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
     <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='img/'+site_logo) }}"/>
@@ -17,7 +18,7 @@
     <div class="wrapper">
         {% include 'top_menu.html' %}
         <aside class="main-sidebar sidebar-light-primary elevation-4">
-            <a href="/" class="brand-link">
+            <a href="/" class="brand-link" data-intro='Site logo and site-name is customizable from site config.'>
                 <img src="/static/img/{{ site_logo }}" class="brand-image img-circle elevation-3">
                 <span class="brand-text font-weight-light"><b>{{ site_name }}</b></span>
             </a>
@@ -86,15 +87,25 @@
     </div>
     <script src="{{ url_for('static', filename='plugins/jquery/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='plugins/intro/minified/intro.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/adminlte.js') }}"></script>
     <script type=text/javascript>
     $(function() {
+        var BASE_URL = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
+        if(RegExp('multipage', 'gi').test(window.location.search)) {
+            introJs('.content-wrapper').start();
+        }
+        else {
+            $('.tour').bind('click', function() {
+                introJs().setOption('doneLabel', 'Next page').start().oncomplete(function() {
+                    window.location.href = BASE_URL + '/myaccount?multipage=true';
+                });
+                introJs().start();
+            });
+        }
+
         $('.btn-primary').bind('click', function() {
             $($(this).attr('frmtarget')).submit();
-        });
-
-        $('.plugin-status').on('click', function() {
-            $(location).attr('href', $(this).attr('url'));
         });
 
         {% block javascript %}{% endblock %}

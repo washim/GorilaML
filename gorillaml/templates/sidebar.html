@@ -21,33 +21,33 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ url_for('plugins') }}" class="nav-link">
+                        <a href="{{ url_for('plugins') }}" class="nav-link" data-intro='All installed and disabled plugins will be listed here.' data-position='right'>
                             <i class="fas fa-plug nav-icon"></i> <p>Plugins</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ url_for('plugin_upload') }}" class="nav-link">
+                        <a href="{{ url_for('plugin_upload') }}" class="nav-link" data-intro='Upload plugins to install.' data-position='right'>
                             <i class="fas fa-upload nav-icon"></i> <p>Plugin Upload</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ url_for('register_local') }}" class="nav-link">
+                        <a href="{{ url_for('register_local') }}" class="nav-link" data-intro='Register your plugin from your local machine. Dont try this in cloud server. It is only for development purpose.' data-position='right'>
                             <i class="fas fa-cash-register nav-icon"></i> <p>Local Plugin Register</p>
                         </a>
                     </li>
                     {% if role == 'admin' %}
                     <li class="nav-item">
-                        <a href="{{ url_for('site_config') }}" class="nav-link">
+                        <a href="{{ url_for('site_config') }}" class="nav-link" data-intro='Change site configuration eg. logo, sitename, slogan, footer etc.' data-position='right'>
                             <i class="fas fa-compress nav-icon"></i> <p>Site Configs</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ url_for('create_user') }}" class="nav-link">
+                        <a href="{{ url_for('create_user') }}" class="nav-link" data-intro='Create user whom you want to give plugin creation permissions.' data-position='right'>
                             <i class="fas fa-user nav-icon"></i> <p>Create User</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ url_for('list_users') }}" class="nav-link">
+                        <a href="{{ url_for('list_users') }}" class="nav-link" data-intro='All approved users will be listed here.' data-position='right'>
                             <i class="fas fa-users nav-icon"></i> <p>List Users</p>
                         </a>
                     </li>

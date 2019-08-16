@@ -5,3 +5,10 @@ input[type="text"], input[type="password"] {width:350px;}
 .custom-switch.custom-switch-on-success .custom-control-input:checked ~ .custom-control-label::after,
 .custom-switch.custom-switch-off-danger .custom-control-input ~ .custom-control-label::before,
 .custom-switch.custom-switch-off-danger .custom-control-input ~ .custom-control-label::after{cursor: pointer;}
+.small-box h3{font-size:30px;}
+.small-box p{font-size:25px;}
+.tour{cursor:pointer;}
+.introjs-helperNumberLayer{top:0px;left:0px;width:10px;height:10px;line-height:10px;}
+.fa-trash{color:red;}
+.fa-thumbs-down{color:orange;}
+.fa-thumbs-up{color:green;}

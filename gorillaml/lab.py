@@ -62,7 +62,7 @@ def securetoken():
     return base64.b64encode((str(session['user_id'])+':'+session['username']+':'+session['password']).encode())
 
 
-def fig_to_html(figure, size=100):
+def fig_to_html(figure, size=99):
     buffer = io.BytesIO()
     figure.savefig(buffer, format='png')
     buffer.seek(0)

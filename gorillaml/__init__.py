@@ -1,6 +1,7 @@
 import os
 import sys
 import click
+import shutil
 import importlib
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -21,7 +22,7 @@ def create_app():
     app.config.from_mapping(
         SECRET_KEY=os.urandom(12),
         PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons'),
-        VERSION='0.0.8'
+        VERSION='0.0.9'
     )
 
     CORS(app)
@@ -42,7 +43,11 @@ def create_app():
     @app.route('/')
     @authorize
     def home():
-        return redirect(url_for('plugins'))
+        dbconn = db.get_db()
+        users = dbconn.query(db.Users).all()
+        plugins = dbconn.query(db.Plugins).all()
+
+        return render_template('home.html', users=users, plugins=plugins)
 
     @app.route('/plugin-upload', methods=['GET', 'POST'])
     @authorize
@@ -156,11 +161,44 @@ def create_app():
     @admin_login_required
     @authorize
     def plugin_activation(status, pid):
-        pstatus = {'installed': 1, 'uninstalled': 2, 'pending': 0}
-        dbconn = db.get_db()
-        dbconn.query(db.Plugins).filter(db.Plugins.id == pid).update({'status': pstatus[status]})
-        dbconn.commit()
+        try:
+            pstatus = {'installed': 1, 'uninstalled': 2, 'pending': 0}
+            dbconn = db.get_db()
+            plugin = dbconn.query(db.Plugins).filter(db.Plugins.id == pid)
+            if status == 'delete':
+                plugin_details = plugin.first()
+                if plugin_details.plugin_path == 'system':
+                    user_folder = os.path.join(app.config['PLUGIN_UPLOAD_FOLDER'], session['username'])
+                    shutil.rmtree(os.path.join(user_folder, plugin_details.name), ignore_errors=True)
+                plugin.delete(synchronize_session=False)
+            else:
+                plugin.update({'status': pstatus[status]})
+            dbconn.commit()
+            flash('Plugins action completed successfully. Dont forget to recreate plugin cache from myaccount section', 'success')
+
+        except:
+            flash('Permission denied.', 'error')
+
         return redirect(url_for('plugins'))
+
+    @app.route('/user-activation/<string:status>/<int:uid>')
+    @admin_login_required
+    @authorize
+    def user_activation(status, uid):
+        if session['user_id'] == uid:
+            flash('Permission denied to disable your own account.', 'error')
+            return redirect(url_for('list_users'))
+
+        try:
+            dbconn = db.get_db()
+            dbconn.query(db.Users).filter(db.Users.id == uid).update({'status': status})
+            dbconn.commit()
+            flash('Users updated successfully.', 'success')
+
+        except:
+            flash('Permission denied.', 'error')
+
+        return redirect(url_for('list_users'))
 
     @app.route('/plugins')
     @authorize
@@ -179,12 +217,13 @@ def create_app():
     @authorize
     def create_user():
         dbconn = db.get_db()
-
+        user_plugins = []
         if request.args.get('id'):
             user = dbconn.query(db.Users).filter(db.Users.id == request.args.get('id'))
             userdata = user.first()
             createuser = form.CreateUserForm(username=userdata.password, password=userdata.password, confirm=userdata.password,
                                              role=userdata.role, status=userdata.status)
+            user_plugins = userdata.plugins
         else:
             createuser = form.CreateUserForm()
 
@@ -205,7 +244,7 @@ def create_app():
 
             redirect(url_for('create_user'))
 
-        return render_template('create_user.html', form=createuser)
+        return render_template('create_user.html', form=createuser, plugins=user_plugins)
 
     @app.route('/list-users')
     @admin_login_required
@@ -229,7 +268,7 @@ def create_app():
                 session['role'] = getuser.role
                 session['status'] = getuser.status
 
-                return redirect(url_for('plugins'))
+                return redirect(url_for('home'))
 
             else:
                 flash('Login failed. Please try again.', 'error')
@@ -250,8 +289,7 @@ def create_app():
         dbconn = db.get_db()
         myaccount = form.MyaccountForm()
         if myaccount.validate_on_submit():
-            dbconn.query(db.Users).filter(db.Users.id == session['user_id']).update(
-                {'password': myaccount.confirm.data})
+            dbconn.query(db.Users).filter(db.Users.id == session['user_id']).update({'password': myaccount.confirm.data})
             dbconn.commit()
             flash('Password updated successfully.', 'success')
             return redirect(url_for('logout'))
@@ -268,6 +306,14 @@ def create_app():
         session.pop('status', None)
 
         return redirect(url_for('login'))
+
+    @app.errorhandler(404)
+    def page_not_found(error_code):
+        return render_template('404.html')
+
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        return render_template('500.html', error=error)
 
     @app.context_processor
     def context():

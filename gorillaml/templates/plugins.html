@@ -3,48 +3,7 @@
 {% block content %}
 <div class="row">
     {% call widget.gcard(title='All Plugins', body_class='p-0') %}
-    <table class="table table-striped">
-        <tbody>
-            <tr>
-                <th style="width: 10px">#</th>
-                <th>Name</th>
-                <th>Status</th>
-                <th>Plugin Path</th>
-                <th>Uploaded By</th>
-                <th>Created</th>
-                {% if role == 'admin' %}
-                <th>Installed/Uninstalled</th>
-                {% endif %}
-            </tr>
-            {% if plugins|length > 0 %}
-            {% for plugin in plugins %}
-            <tr>
-                <td>{{ plugin.id }}</td>
-                <td><a href="/{{ plugin.name }}">{{ plugin.name }}</a></td>
-                <td>{% if plugin.status == 1 %}<span class="badge bg-success">Enabled</span>{% elif plugin.status == 2 %}<span class="badge bg-danger">Disabled</span>{% else %}<span class="badge bg-warning">Pending Approval</span>{% endif %}</td>
-                <td>{{ plugin.plugin_path }}</td>
-                <td>{{ plugin.user.username }}</td>
-                <td>{{ plugin.created }}</td>
-                {% if role == 'admin' %}
-                <td>
-                    {% if plugin.status == 1 %}
-                    <input type="checkbox" class="plugin-status" url="{{ url_for('plugin_activation', status='uninstalled', pid=plugin.id) }}" checked>
-                    {% elif plugin.status == 2 %}
-                    <input type="checkbox" class="plugin-status" url="{{ url_for('plugin_activation', status='installed', pid=plugin.id) }}">
-                    {% else %}
-                    <input type="checkbox" class="plugin-status" url="{{ url_for('plugin_activation', status='installed', pid=plugin.id) }}">
-                    {% endif %}
-                </td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-            {% else %}
-            <tr>
-                <td colspan="{% if role == 'admin' %}8{% else %}7{% endif %}" align="center">No plugins found yet.</td>
-            </tr>
-            {% endif %}
-        </tbody>
-    </table>
+    {% include 'plugins_table.html' %}
     {% endcall %}
 </div>
 {% endblock %}

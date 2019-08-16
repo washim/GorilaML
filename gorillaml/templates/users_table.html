@@ -1,0 +1,28 @@
+<table class="table table-striped">
+    <tbody>
+        <tr>
+            <th style="width: 10px">#</th>
+            <th>User name</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Created</th>
+            {% if role == 'admin' %}<th>Action</th>{% endif %}
+        </tr>
+        {% if users|length > 0 %}
+        {% for user in users %}
+        <tr>
+            <td><a href="{{ url_for('create_user', id=user.id) }}"><i class="fas fa-eye"></i></a></td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.role }}</td>
+            <td>{% if user.status == 'enabled' %}<span class="badge bg-success">Enabled</span>{% else %}<span class="badge bg-danger">Disabled</span>{% endif %}</td>
+            <td>{{ user.created }}</td>
+            {% if role == 'admin' %}<td>{% if user.status == 'disabled' %}<a href="{{ url_for('user_activation', status='enabled', uid=user.id) }}" title="Enable this user"><i class="fas fa-thumbs-up"></i></a> {% else %}<a href="{{ url_for('user_activation', status='disabled', uid=user.id) }}" title="Disable this user"><i class="fas fa-thumbs-down"></i></a>{% endif %}</td>{% endif %}
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="{% if role == 'admin' %}6{% else %}5{% endif %}" align="center">No users found yet.</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>

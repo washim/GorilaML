@@ -5,7 +5,7 @@ with open('README.rst') as f:
 
 setup(
     name='gorillaml',
-    version='0.0.8',
+    version='0.0.9',
     packages=['gorillaml'],
     license='MIT license',
     url="https://www.gorillaml.com",

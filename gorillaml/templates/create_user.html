@@ -2,12 +2,24 @@
 
 {% block content %}
 <div class="row">
+    {% if form.username.data %}
+    {% set button,form_title="Update","Update user" %}
+    {% else %}
+    {% set button,form_title="Register","Create new user" %}
+    {% endif %}
+
     {% set footer %}
-    <button type="Create" class="btn btn-primary" frmtarget="#form_register_user">Register</button>
+    <button type="Create" class="btn btn-primary" frmtarget="#form_register_user">{{ button }}</button>
     {% endset %}
 
-    {% call widget.gcard(title='Create new user', footer=footer) %}
+    {% call widget.gcard(title=form_title, class='col-md-5', footer=footer) %}
     {{ widget.gform('form_register_user', request.url, form, ['username','password','confirm','role','status']) }}
     {% endcall %}
+
+    <div class="col-md-7">
+        {% call widget.gcard(title='Plugins shortcut', class='', body_class='p-0') %}
+        {% include 'plugins_table.html' %}
+        {% endcall %}
+    </div>
 </div>
 {% endblock %}

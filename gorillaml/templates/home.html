@@ -1,33 +1,22 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="col-md-12">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Services</h3>
-        </div>
-        <!-- /.card-header -->
-        <div class="card-body p-0">
-            <table class="table table-condensed">
-                <tbody>
-                    <tr>
-                        <th style="width: 10px">#</th>
-                        <th>Title</th>
-                        <th>Description</th>
-                        <th>Author</th>
-                        <th>Action</th>
-                    </tr>
-                    <tr>
-                        <td>1.</td>
-                        <td>Update software</td>
-                        <td>Web service software.</td>
-                        <td>Washim Ahmed &lt;washim.ahmed@gmail.com&gt;</td>
-                        <td>Open,Edit,Delete</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <!-- /.card-body -->
+<div class="row">
+    {{ widget.gbox(title='Installed Plugins', value=plugins|length, icon_class='fas fa-plug nav-icon', type='bg-info', url=url_for('plugins'), footer='More info') }}
+    {{ widget.gbox(title='Approved Users', value=users|length, icon_class='fas fa-cash-register nav-icon', type='bg-warning', url=url_for('list_users'), footer='More info') }}
+    {{ widget.gbox(title='Recreate plugins cache', value='Everytime when code changed', icon_class='fas fa-upload nav-icon', type='bg-danger', url=url_for('myaccount'), footer='Goto My Account') }}
+    {{ widget.gbox(title='Current Version', value='gorillaml-'+version, icon_class='fas fa-compress nav-icon', type='bg-success', url='https://pypi.org/project/gorillaml/', footer='Goto pypi.org') }}
+</div>
+<div class="row">
+    <div class="col-md-8">
+        {% call widget.gcard(title='Plugins shortcut', class='', body_class='p-0') %}
+        {% include 'plugins_table.html' %}
+        {% endcall %}
+    </div>
+    <div class="col-md-4">
+        {% call widget.gcard(title='Users shortcut', class='', body_class='p-0') %}
+        {% include 'users_table.html' %}
+        {% endcall %}
     </div>
 </div>
 {% endblock %}
