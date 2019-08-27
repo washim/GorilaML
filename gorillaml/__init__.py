@@ -321,16 +321,26 @@ def create_app():
         dbconn = db.get_db()
         if action == 'open':
             if fid:
-                field_reff = dbconn.query(db.Field_refference).get(fid)
+                field_reff = dbconn.query(db.Field_refference).filter(db.Field_refference.id == fid and db.Field_refference.author_id == session['user_id']).first()
                 if field_reff:
                     if child_action == 'delete' and cid:
                         child_field = dbconn.query(db.Field_refference_fields).get(cid)
+
+                        if child_field is None:
+                            flash('Permission denied.', 'error')
+                            return redirect(url_for('form_builder'))
+                        
                         dbconn.delete(child_field)
                         dbconn.commit()
                         return redirect(url_for('form_builder', action='open', fid=fid))
 
                     elif child_action == 'edit' and cid:
                         child_field = dbconn.query(db.Field_refference_fields).get(cid)
+                        
+                        if child_field is None:
+                            flash('Permission denied.', 'error')
+                            return redirect(url_for('form_builder'))
+                        
                         formbuilder_fields = form.FormBuilderFields(
                             name=child_field.name,
                             title=child_field.title,
@@ -384,8 +394,13 @@ def create_app():
 
         elif action == 'edit':
             if fid:
-                field_reff_conn = dbconn.query(db.Field_refference).filter(db.Field_refference.id == fid)
+                field_reff_conn = dbconn.query(db.Field_refference).filter(db.Field_refference.id == fid and db.Field_refference.author_id == session['user_id'])
                 field_reff = field_reff_conn.first()
+
+                if field_reff is None:
+                    flash('Permission denied.', 'error')
+                    return redirect(url_for('form_builder'))
+
                 formbuilder = form.FormBuilder(name=field_reff.name, callback=field_reff.callback, method=field_reff.method, enctype=field_reff.enctype)
                 collections = dbconn.query(db.Field_refference).all()
                 if formbuilder.validate_on_submit():
@@ -398,6 +413,11 @@ def create_app():
         elif action == 'delete':
             if fid:
                 field_reff = dbconn.query(db.Field_refference).get(fid)
+
+                if field_reff is None:
+                    flash('Permission denied.', 'error')
+                    return redirect(url_for('form_builder'))
+
                 dbconn.delete(field_reff)
                 dbconn.commit()
 
@@ -414,19 +434,6 @@ def create_app():
                 return redirect(url_for('form_builder'))
 
             return render_template('form_builder.html', form=formbuilder, collections=collections)
-
-    @app.route('/field-refference-field/<string:field_type>/<string:action>/<int:id>')
-    @authorize
-    def field_refference_field(field_type, action, id):
-        dbconn = db.get_db()
-        if action == 'delete':
-            field = dbconn.query(db.Field_refference_fields).get(id)
-            dbconn.delete(field)
-            dbconn.commit()
-            return redirect(url_for('form_builder', action='open', fid=field.fid))
-
-        return ''
-
 
     @app.errorhandler(404)
     def page_not_found(error_code):
