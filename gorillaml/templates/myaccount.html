@@ -7,7 +7,7 @@
     {% endset %}
 
     {% call widget.gcard(title='Create new user', footer=footer) %}
-    {{ widget.gform('form_change_password', url_for('myaccount'), form, ['current_password','password','confirm']) }}
+    {{ widget.gform('form_change_password', form, ['current_password','password','confirm']) }}
     {% endcall %}
 
     {% if role == 'admin' %}

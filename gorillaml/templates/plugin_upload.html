@@ -7,7 +7,7 @@
     {% endset %}
 
     {% call widget.gcard(title='Upload your plugin', footer=footer) %}
-    {{ widget.gform('form_addon_upload', request.url, form, ['upload'], form_enctype='Yes') }}
+    {{ widget.gform('form_addon_upload', form, ['upload'], form_enctype='Yes') }}
     {% endcall %}
 </div>
 {% endblock %}

@@ -3,8 +3,10 @@ import sys
 import click
 import shutil
 import importlib
+from ast import literal_eval
 from datetime import datetime
 from werkzeug.utils import secure_filename
+from flask_wtf import FlaskForm
 from flask_cors import CORS
 from flask.cli import FlaskGroup
 from gorillaml import db
@@ -14,6 +16,10 @@ from gorillaml.lab import (
 )
 from flask import (
     Flask, render_template, request, flash, redirect, url_for, session
+)
+from wtforms import (
+    StringField, SelectField, IntegerField, FloatField, DecimalField, RadioField, HiddenField, PasswordField,
+    SelectMultipleField, TextAreaField, BooleanField, FileField, SubmitField, validators
 )
 
 
@@ -307,6 +313,121 @@ def create_app():
 
         return redirect(url_for('login'))
 
+    @app.route('/form-builder/<string:action>/<int:fid>/<string:child_action>/<int:cid>', methods=['GET', 'POST'])
+    @app.route('/form-builder/<string:action>/<int:fid>', methods=['GET', 'POST'])
+    @app.route('/form-builder', methods=['GET', 'POST'])
+    @authorize
+    def form_builder(action=None, fid=None, child_action=None, cid=None):
+        dbconn = db.get_db()
+        if action == 'open':
+            if fid:
+                field_reff = dbconn.query(db.Field_refference).get(fid)
+                if field_reff:
+                    if child_action == 'delete' and cid:
+                        child_field = dbconn.query(db.Field_refference_fields).get(cid)
+                        dbconn.delete(child_field)
+                        dbconn.commit()
+                        return redirect(url_for('form_builder', action='open', fid=fid))
+
+                    elif child_action == 'edit' and cid:
+                        child_field = dbconn.query(db.Field_refference_fields).get(cid)
+                        formbuilder_fields = form.FormBuilderFields(
+                            name=child_field.name,
+                            title=child_field.title,
+                            type=child_field.type,
+                            weight=child_field.weight,
+                            choiced=child_field.choiced,
+                            required=child_field.required
+                        )
+
+                    else:
+                        formbuilder_fields = form.FormBuilderFields()
+
+                    if formbuilder_fields.validate_on_submit():
+                        if child_action == 'edit' and cid:
+                            child_field = dbconn.query(db.Field_refference_fields).filter(db.Field_refference_fields.id == cid)
+                            child_field.update({
+                                'name': formbuilder_fields.name.data,
+                                'title': formbuilder_fields.title.data,
+                                'type': formbuilder_fields.type.data,
+                                'weight': formbuilder_fields.weight.data,
+                                'choiced': formbuilder_fields.choiced.data,
+                                'required': formbuilder_fields.required.data
+                            })
+                            dbconn.commit()
+
+                        else:
+                            field_reff_field = db.Field_refference_fields(
+                                fid=fid,
+                                name=formbuilder_fields.name.data,
+                                title=formbuilder_fields.title.data,
+                                type=formbuilder_fields.type.data,
+                                weight=formbuilder_fields.weight.data,
+                                choiced=formbuilder_fields.choiced.data,
+                                required=formbuilder_fields.required.data
+                            )
+                            dbconn.add(field_reff_field)
+                            dbconn.commit()
+
+                        return redirect(url_for('form_builder', action=action, fid=fid))
+
+                    return render_template(
+                        'form_builder_fields.html',
+                        form=formbuilder_fields,
+                        action=action,
+                        field_reff_fields=field_reff
+                    )
+
+                else:
+                    flash('Permission denied.', 'error')
+                    return redirect(url_for('form_builder'))
+
+        elif action == 'edit':
+            if fid:
+                field_reff_conn = dbconn.query(db.Field_refference).filter(db.Field_refference.id == fid)
+                field_reff = field_reff_conn.first()
+                formbuilder = form.FormBuilder(name=field_reff.name, callback=field_reff.callback, method=field_reff.method, enctype=field_reff.enctype)
+                collections = dbconn.query(db.Field_refference).all()
+                if formbuilder.validate_on_submit():
+                    field_reff_conn.update({'name': formbuilder.name.data, 'callback': formbuilder.callback.data, 'method': formbuilder.method.data, 'enctype': formbuilder.enctype.data})
+                    dbconn.commit()
+                    return redirect(url_for('form_builder'))
+
+                return render_template('form_builder.html', form=formbuilder, action=action, fid=fid, collections=collections)
+
+        elif action == 'delete':
+            if fid:
+                field_reff = dbconn.query(db.Field_refference).get(fid)
+                dbconn.delete(field_reff)
+                dbconn.commit()
+
+            return redirect(url_for('form_builder'))
+
+        else:
+            formbuilder = form.FormBuilder()
+            collections = dbconn.query(db.Field_refference).all()
+            if formbuilder.validate_on_submit():
+                field_reff = db.Field_refference(author_id=session['user_id'], name=formbuilder.name.data, callback=formbuilder.callback.data, method=formbuilder.method.data, enctype=formbuilder.enctype.data)
+                dbconn.add(field_reff)
+                dbconn.commit()
+                dbconn.refresh(field_reff)
+                return redirect(url_for('form_builder'))
+
+            return render_template('form_builder.html', form=formbuilder, collections=collections)
+
+    @app.route('/field-refference-field/<string:field_type>/<string:action>/<int:id>')
+    @authorize
+    def field_refference_field(field_type, action, id):
+        dbconn = db.get_db()
+        if action == 'delete':
+            field = dbconn.query(db.Field_refference_fields).get(id)
+            dbconn.delete(field)
+            dbconn.commit()
+            return redirect(url_for('form_builder', action='open', fid=field.fid))
+
+        return ''
+
+
     @app.errorhandler(404)
     def page_not_found(error_code):
         return render_template('404.html')
@@ -317,6 +438,58 @@ def create_app():
 
     @app.context_processor
     def context():
+        def form_builder(id):
+            dbconn = db.get_db()
+            fields = dbconn.query(db.Field_refference).get(id)
+            record_count = dbconn.query(db.Field_refference_fields).filter(db.Field_refference_fields.fid == id).count()
+
+            class FormBuilderForm(FlaskForm):
+                pass
+
+            if fields:
+                for field in fields.field_refference_fields:
+                    if field.type == 'StringField':
+                        setattr(FormBuilderForm, field.name, StringField(field.title, [validators.DataRequired()]))
+
+                    elif field.type == 'SelectField':
+                        setattr(FormBuilderForm, field.name, SelectField(field.title, [validators.DataRequired()], choices=literal_eval(field.choiced)))
+
+                    elif field.type == 'IntegerField':
+                        setattr(FormBuilderForm, field.name, IntegerField(field.title, [validators.DataRequired()]))
+
+                    elif field.type == 'SelectMultipleField':
+                        setattr(FormBuilderForm, field.name, SelectMultipleField(field.title, [validators.DataRequired()], choices=literal_eval(field.choiced)))
+
+                    elif field.type == 'TextAreaField':
+                        setattr(FormBuilderForm, field.name, TextAreaField(field.title, [validators.DataRequired()]))
+
+                    elif field.type == 'BooleanField':
+                        setattr(FormBuilderForm, field.name, BooleanField(field.title, [validators.DataRequired()]))
+
+                    elif field.type == 'FileField':
+                        setattr(FormBuilderForm, field.name, FileField(field.title, [validators.DataRequired()]))
+
+                    elif field.type == 'SubmitField':
+                        setattr(FormBuilderForm, field.name, SubmitField(field.title, [validators.DataRequired()]))
+
+                    elif field.type == 'FloatField':
+                        setattr(FormBuilderForm, field.name, FloatField(field.title, [validators.DataRequired()]))
+
+                    elif field.type == 'DecimalField':
+                        setattr(FormBuilderForm, field.name, DecimalField(field.title, [validators.DataRequired()]))
+
+                    elif field.type == 'RadioField':
+                        setattr(FormBuilderForm, field.name, RadioField(field.title, [validators.DataRequired()]))
+
+                    elif field.type == 'HiddenField':
+                        setattr(FormBuilderForm, field.name, HiddenField(field.title, [validators.DataRequired()]))
+
+                    elif field.type == 'PasswordField':
+                        setattr(FormBuilderForm, field.name, PasswordField(field.title, [validators.DataRequired()]))
+
+            dform = FormBuilderForm()
+            return dict(info=fields, elements=dform, count=record_count)
+
         dbconn = db.get_db()
         siteconfig = dbconn.query(db.Configs).all()
         site_context = {}
@@ -351,6 +524,7 @@ def create_app():
 
         site_context['version'] = app.config['VERSION']
         site_context['available_version'] = site_context['available_version']
+        site_context['build'] = form_builder
 
         return site_context
 

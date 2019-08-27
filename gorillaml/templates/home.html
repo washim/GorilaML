@@ -3,7 +3,7 @@
 {% block content %}
 <div class="row">
     {{ widget.gbox(title='Installed Plugins', value=plugins|length, icon_class='fas fa-plug nav-icon', type='bg-info', url=url_for('plugins'), footer='More info') }}
-    {{ widget.gbox(title='Approved Users', value=users|length, icon_class='fas fa-cash-register nav-icon', type='bg-warning', url=url_for('list_users'), footer='More info') }}
+    {{ widget.gbox(title='Approved Users', value=users|length, icon_class='fas fa-users nav-icon', type='bg-warning', url=url_for('list_users'), footer='More info') }}
     {{ widget.gbox(title='Recreate plugins cache', value='Everytime when code changed', icon_class='fas fa-upload nav-icon', type='bg-danger', url=url_for('myaccount'), footer='Goto My Account') }}
     {{ widget.gbox(title='Current Version', value='gorillaml-'+version, icon_class='fas fa-compress nav-icon', type='bg-success', url='https://pypi.org/project/gorillaml/', footer='Goto pypi.org') }}
 </div>

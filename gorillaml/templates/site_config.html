@@ -7,7 +7,7 @@
     {% endset %}
 
     {% call widget.gcard(title='Site Configurations', footer=footer) %}
-    {{ widget.gform('form_site_config', url_for('site_config'), form, ['site_logo','site_name', 'site_slogan', 'page_title', 'copyrights'], form_enctype='Yes') }}
+    {{ widget.gform('form_site_config', form, ['site_logo','site_name', 'site_slogan', 'page_title', 'copyrights'], form_enctype='Yes') }}
     {% endcall %}
 </div>
 {% endblock %}

@@ -12,3 +12,4 @@ input[type="text"], input[type="password"] {width:350px;}
 .fa-trash{color:red;}
 .fa-thumbs-down{color:orange;}
 .fa-thumbs-up{color:green;}
+label[for="csrf_token"]{display:none;}

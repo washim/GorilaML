@@ -19,6 +19,7 @@ class Users(Base):
     status = Column('status', String, nullable=False)
     created = Column('created', Date, nullable=False, default=datetime.now)
     plugins = relationship('Plugins', back_populates='user')
+    field_refferences = relationship('Field_refference', back_populates='user')
 
     def __repr__(self):
         return f"<Users(username='{self.username}', password='{self.password}', role='{self.role}')>"
@@ -37,6 +38,7 @@ class Plugins(Base):
     def __repr__(self):
         return f"<Plugins(name='{self.name}', plugin_path='{self.plugin_path}')>"
 
+
 class Configs(Base):
     __tablename__ = 'configs'
     id = Column(Integer, primary_key=True)
@@ -45,6 +47,37 @@ class Configs(Base):
 
     def __repr__(self):
         return f"<Configs(key='{self.key}', value='{self.value}')>"
+
+
+class Field_refference(Base):
+    __tablename__ = 'field_refference'
+    id = Column(Integer, primary_key=True)
+    author_id = Column(Integer, ForeignKey('users.id'))
+    name = Column('name', String, nullable=False)
+    callback = Column('callback', String, nullable=False)
+    method = Column('method', String, nullable=False)
+    enctype = Column('enctype', String, nullable=True)
+    user = relationship('Users', back_populates='field_refferences')
+    field_refference_fields = relationship('Field_refference_fields', back_populates='field_refferences', order_by='Field_refference_fields.weight', cascade='save-update, merge, delete')
+
+    def __repr__(self):
+        return f"<Field_refference(name='{self.name}')>"
+
+
+class Field_refference_fields(Base):
+    __tablename__ = 'field_refference_fields'
+    id = Column(Integer, primary_key=True)
+    fid = Column(Integer, ForeignKey('field_refference.id'))
+    name = Column('name', String, nullable=False)
+    title = Column('title', String, nullable=False)
+    type = Column('type', String, nullable=False)
+    choiced = Column('choiced', String, nullable=True)
+    weight = Column('weight', Integer, nullable=False)
+    required = Column('required', String, nullable=False)
+    field_refferences = relationship('Field_refference', back_populates='field_refference_fields')
+
+    def __repr__(self):
+        return f"<Field_refference_fields(name='{self.name}', type='{self.type}')>"
 
 
 def get_db():

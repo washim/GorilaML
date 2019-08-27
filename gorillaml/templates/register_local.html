@@ -7,7 +7,7 @@
     {% endset %}
 
     {% call widget.gcard(title='Register your plugin from your local machine', footer=footer) %}
-    {{ widget.gform('form_register_plugin', request.url, form, ['local_plugin_name','local_plugin_path']) }}
+    {{ widget.gform('form_register_plugin', form, ['local_plugin_name','local_plugin_path']) }}
     {% endcall %}
 </div>
 {% endblock %}

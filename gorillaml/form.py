@@ -3,7 +3,7 @@ import shutil
 from werkzeug.utils import secure_filename
 from zipfile import ZipFile
 from flask import current_app, session
-from wtforms import StringField, PasswordField, SelectField, validators, ValidationError
+from wtforms import StringField, PasswordField, SelectField, TextAreaField, validators, ValidationError
 from wtforms.widgets import PasswordInput
 from flask_wtf import FlaskForm, file
 from flask_wtf.csrf import CSRFProtect
@@ -78,3 +78,31 @@ class RegisterSiteConfigForm(FlaskForm):
     site_logo = file.FileField('Site logo', [file.FileAllowed(['png', 'jpeg', 'jpg', 'gif'])])
     page_title = StringField('Page title', [validators.DataRequired()])
     copyrights = SelectField('Copyrights footer', choices=[('yes', 'Enabled'), ('no', 'Disabled')])
+
+class FormBuilder(FlaskForm):
+    name = StringField('Name', [validators.DataRequired()])
+    callback = StringField('Callback', [validators.DataRequired()])
+    method = SelectField('Method', choices=[('POST', 'POST'), ('GET', 'GET')])
+    enctype = SelectField('Encryption', choices=[('normal', 'Normal'), ('multipart/form-data', 'File Upload')])
+
+class FormBuilderFields(FlaskForm):
+    name = StringField('Name', [validators.DataRequired()])
+    title = StringField('Title', [validators.DataRequired()])
+    type = SelectField('Type', choices=[
+        ('StringField', 'StringField'),
+        ('SelectField', 'SelectField'),
+        ('IntegerField', 'IntegerField'),
+        ('SelectMultipleField', 'SelectMultipleField'),
+        ('TextAreaField', 'TextAreaField'),
+        ('BooleanField', 'BooleanField'),
+        ('FileField', 'FileField'),
+        ('SubmitField', 'SubmitField'),
+        ('FloatField', 'FloatField'),
+        ('DecimalField', 'DecimalField'),
+        ('RadioField', 'RadioField'),
+        ('HiddenField', 'HiddenField'),
+        ('PasswordField', 'PasswordField')
+    ])
+    weight = SelectField('Weight', choices=[(item, item) for item in range(-100, 100, 1)], coerce=int, default=0)
+    choiced = TextAreaField('Choices', default="[('key', 'value'), ('key1', 'value1')]")
+    required = SelectField('Required', choices=[('yes', 'Yes'), ('no', 'No')])
