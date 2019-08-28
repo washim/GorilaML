@@ -5,5 +5,4 @@ instance
 .idea
 build
 dist
-ENV
-venv
+.env

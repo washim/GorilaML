@@ -1,6 +1,6 @@
 h1{font-weight: lighter;}
 label{margin:0px;}
-input[type="text"], input[type="password"] {width:350px;}
+.form-control{width:350px;}
 .custom-switch.custom-switch-on-success .custom-control-input:checked ~ .custom-control-label::before,
 .custom-switch.custom-switch-on-success .custom-control-input:checked ~ .custom-control-label::after,
 .custom-switch.custom-switch-off-danger .custom-control-input ~ .custom-control-label::before,
@@ -13,3 +13,7 @@ input[type="text"], input[type="password"] {width:350px;}
 .fa-thumbs-down{color:orange;}
 .fa-thumbs-up{color:green;}
 label[for="csrf_token"]{display:none;}
+.form-group{margin-bottom: 6px;}
+.form-group.has-error label {color: #dd4b39;}
+.form-group.has-error .form-control, .form-group.has-error .input-group-addon {border-color: #dd4b39;box-shadow: none;}
+.form-group.has-error .help-block {color: #dd4b39;}

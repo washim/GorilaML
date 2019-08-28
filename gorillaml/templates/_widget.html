@@ -20,19 +20,15 @@
 <form id="{{ form_id }}" role="form" {% if form_enctype %}enctype="multipart/form-data" {% endif %}method="{{ form_methods }}">
     {% if fields %}
     {{ form.csrf_token }}
-    <table cellpadding="5">
-        {% for field in fields %}
-        <tr class="{{ form[field].name }}">
-            <td>{{ form[field].label }} {% if form[field].flags.required %}<span class="text-danger">*</span>{% endif %}</td>
-            <td>{{ form[field](class_="form-control") }}</td>
-            <td>
-                {% for message in form[field].errors %}
-                    <div class="text-danger">{{ message }}</div>
-                {% endfor %}
-            </td>
-        </tr>
+    {% for field in fields %}
+    <div class="form-group{% if form[field].errors %} has-error{% endif %}">
+        {{ form[field].label }} {% if form[field].flags.required %}<span class="text-danger">*</span>{% endif %}
+        {{ form[field](class_="form-control") }}
+        {% for message in form[field].errors %}
+        <span class="help-block small">{{ message }}</span>
         {% endfor %}
-    </table>
+    </div>
+    {% endfor %}
     {% endif %}
     {% if fields_content %} {{ fields_content }} {% endif %}
 </form>

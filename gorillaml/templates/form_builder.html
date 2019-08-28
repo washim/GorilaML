@@ -6,7 +6,7 @@
     <button class="btn btn-primary" frmtarget="#form_field_reff">Save Form</button>
     {% endset %}
 
-    {% call widget.gcard(title='Form Builder', class='col-md-4', footer=footer) %}
+    {% call widget.gcard(title='Form Builder', class='col-md-3', footer=footer) %}
     {% if action and fid %}
     {{ widget.gform('form_field_reff', form, ['name', 'callback', 'method', 'enctype']) }}
     {% else %}
@@ -14,7 +14,7 @@
     {% endif %}
     {% endcall %}
 
-    {% call widget.gcard(title='Form builder form collections', class='col-md-8', body_class='p-0') %}
+    {% call widget.gcard(title='Form builder form collections', class='col-md-9', body_class='p-0') %}
     <table class="table table-striped">
         <tbody>
             <tr>
