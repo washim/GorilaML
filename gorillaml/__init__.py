@@ -6,6 +6,7 @@ import importlib
 from ast import literal_eval
 from datetime import datetime
 from werkzeug.utils import secure_filename
+from werkzeug.serving import run_simple
 from flask_wtf import FlaskForm
 from flask_cors import CORS
 from flask.cli import FlaskGroup
@@ -22,13 +23,14 @@ from wtforms import (
     SelectMultipleField, TextAreaField, BooleanField, FileField, SubmitField, validators
 )
 
+plugins_context_rebuild = False
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY=os.urandom(12),
         PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons'),
-        VERSION='0.1.0'
+        VERSION='0.1.1'
     )
 
     CORS(app)
@@ -157,11 +159,9 @@ def create_app():
     @admin_login_required
     @authorize
     def plugins_cache_recreate():
-        shutdown = request.environ.get('werkzeug.server.shutdown')
-        if shutdown:
-            shutdown()
-
-        return ''
+        global plugins_context_rebuild
+        plugins_context_rebuild = True
+        return redirect(url_for('reauth', token=securetoken()))
 
     @app.route('/plugin-activation/<string:status>/<int:pid>')
     @admin_login_required
@@ -176,16 +176,20 @@ def create_app():
                 if plugin_details.plugin_path == 'system':
                     user_folder = os.path.join(app.config['PLUGIN_UPLOAD_FOLDER'], session['username'])
                     shutil.rmtree(os.path.join(user_folder, plugin_details.name), ignore_errors=True)
+                flash('Plugin deleted successfully.', 'success')
                 plugin.delete(synchronize_session=False)
             else:
+                flash('Plugin updated successfully.', 'success')
                 plugin.update({'status': pstatus[status]})
+
             dbconn.commit()
-            flash('Plugins action completed successfully. Dont forget to recreate plugin cache from myaccount section', 'success')
+            global plugins_context_rebuild
+            plugins_context_rebuild = True
 
         except:
             flash('Permission denied.', 'error')
 
-        return redirect(url_for('plugins'))
+        return redirect(url_for('plugins', token=securetoken()))
 
     @app.route('/user-activation/<string:status>/<int:uid>')
     @admin_login_required
@@ -321,10 +325,10 @@ def create_app():
         dbconn = db.get_db()
         if action == 'open':
             if fid:
-                field_reff = dbconn.query(db.Field_refference).filter(db.Field_refference.id == fid and db.Field_refference.author_id == session['user_id']).first()
+                field_reff = dbconn.query(db.Form_reference).filter(db.Form_reference.id == fid and db.db.Form_reference.author_id == session['user_id']).first()
                 if field_reff:
                     if child_action == 'delete' and cid:
-                        child_field = dbconn.query(db.Field_refference_fields).get(cid)
+                        child_field = dbconn.query(db.Form_reference_fields).get(cid)
 
                         if child_field is None:
                             flash('Permission denied.', 'error')
@@ -335,7 +339,7 @@ def create_app():
                         return redirect(url_for('form_builder', action='open', fid=fid))
 
                     elif child_action == 'edit' and cid:
-                        child_field = dbconn.query(db.Field_refference_fields).get(cid)
+                        child_field = dbconn.query(db.Form_reference_fields).get(cid)
                         
                         if child_field is None:
                             flash('Permission denied.', 'error')
@@ -355,7 +359,7 @@ def create_app():
 
                     if formbuilder_fields.validate_on_submit():
                         if child_action == 'edit' and cid:
-                            child_field = dbconn.query(db.Field_refference_fields).filter(db.Field_refference_fields.id == cid)
+                            child_field = dbconn.query(db.Form_reference_fields).filter(db.Form_reference_fields.id == cid)
                             child_field.update({
                                 'name': formbuilder_fields.name.data,
                                 'title': formbuilder_fields.title.data,
@@ -367,7 +371,7 @@ def create_app():
                             dbconn.commit()
 
                         else:
-                            field_reff_field = db.Field_refference_fields(
+                            field_reff_field = db.Form_reference_fields(
                                 fid=fid,
                                 name=formbuilder_fields.name.data,
                                 title=formbuilder_fields.title.data,
@@ -394,7 +398,7 @@ def create_app():
 
         elif action == 'edit':
             if fid:
-                field_reff_conn = dbconn.query(db.Field_refference).filter(db.Field_refference.id == fid and db.Field_refference.author_id == session['user_id'])
+                field_reff_conn = dbconn.query(db.Form_reference).filter(db.Form_reference.id == fid and db.Form_reference.author_id == session['user_id'])
                 field_reff = field_reff_conn.first()
 
                 if field_reff is None:
@@ -402,7 +406,7 @@ def create_app():
                     return redirect(url_for('form_builder'))
 
                 formbuilder = form.FormBuilder(name=field_reff.name, callback=field_reff.callback, method=field_reff.method, enctype=field_reff.enctype)
-                collections = dbconn.query(db.Field_refference).all()
+                collections = dbconn.query(db.Form_reference).all()
                 if formbuilder.validate_on_submit():
                     field_reff_conn.update({'name': formbuilder.name.data, 'callback': formbuilder.callback.data, 'method': formbuilder.method.data, 'enctype': formbuilder.enctype.data})
                     dbconn.commit()
@@ -412,7 +416,7 @@ def create_app():
 
         elif action == 'delete':
             if fid:
-                field_reff = dbconn.query(db.Field_refference).get(fid)
+                field_reff = dbconn.query(db.Form_reference).get(fid)
 
                 if field_reff is None:
                     flash('Permission denied.', 'error')
@@ -425,9 +429,9 @@ def create_app():
 
         else:
             formbuilder = form.FormBuilder()
-            collections = dbconn.query(db.Field_refference).all()
+            collections = dbconn.query(db.Form_reference).all()
             if formbuilder.validate_on_submit():
-                field_reff = db.Field_refference(author_id=session['user_id'], name=formbuilder.name.data, callback=formbuilder.callback.data, method=formbuilder.method.data, enctype=formbuilder.enctype.data)
+                field_reff = db.Form_reference(author_id=session['user_id'], name=formbuilder.name.data, callback=formbuilder.callback.data, method=formbuilder.method.data, enctype=formbuilder.enctype.data)
                 dbconn.add(field_reff)
                 dbconn.commit()
                 dbconn.refresh(field_reff)
@@ -443,18 +447,47 @@ def create_app():
     def internal_server_error(error):
         return render_template('500.html', error=error)
 
+    @app.before_request
+    def before_request():
+        with app.app_context():
+            dbconn = db.get_db()
+            allplugins = []
+
+            try:
+                allplugins = dbconn.query(db.Plugins).filter(db.Plugins.status == 1).all()
+            except:
+                pass
+
+            for plugin in allplugins:
+                try:
+                    if plugin.plugin_path == 'system':
+                        plugin_libs = importlib.import_module('addons.%s.%s.plugin' % (plugin.user.username, plugin.name))
+                        bp = getattr(plugin_libs, 'gorillaml')
+                        app.register_blueprint(bp)
+
+                    else:
+                        if plugin.plugin_path not in sys.path:
+                            sys.path.append(plugin.plugin_path)
+
+                        plugin_libs = importlib.import_module('%s.plugin' % plugin.name)
+                        bp = getattr(plugin_libs, 'gorillaml')
+                        app.register_blueprint(bp)
+
+                except Exception as e:
+                    pass
+
     @app.context_processor
     def context():
         def form_builder(id):
             dbconn = db.get_db()
-            fields = dbconn.query(db.Field_refference).get(id)
-            record_count = dbconn.query(db.Field_refference_fields).filter(db.Field_refference_fields.fid == id).count()
+            fields = dbconn.query(db.Form_reference).get(id)
+            record_count = dbconn.query(db.Form_reference_fields).filter(db.Form_reference_fields.fid == id).count()
 
             class FormBuilderForm(FlaskForm):
                 pass
 
             if fields:
-                for field in fields.field_refference_fields:
+                for field in fields.form_reference_fields:
                     if field.type == 'StringField':
                         setattr(FormBuilderForm, field.name, StringField(field.title, [validators.DataRequired()]))
 
@@ -535,36 +568,34 @@ def create_app():
 
         return site_context
 
-    with app.app_context():
-        dbconn = db.get_db()
-        allplugins = []
-
-        try:
-            allplugins = dbconn.query(db.Plugins).filter(db.Plugins.status == 1).all()
-        except:
-            pass
-
-        for plugin in allplugins:
-            try:
-                if plugin.plugin_path == 'system':
-                    plugin_libs = importlib.import_module('addons.%s.%s.plugin' % (plugin.user.username, plugin.name))
-                    bp = getattr(plugin_libs, 'gorillaml')
-                    app.register_blueprint(bp)
-
-                else:
-                    if plugin.plugin_path not in sys.path:
-                        sys.path.append(plugin.plugin_path)
-
-                    plugin_libs = importlib.import_module('%s.plugin' % plugin.name)
-                    bp = getattr(plugin_libs, 'gorillaml')
-                    app.register_blueprint(bp)
-
-            except Exception as e:
-                pass
-
+    app.cli.add_command(start_server)
     return app
+
+
+class AppReloader(object):
+    def __init__(self, gorilla_app):
+        self.gorilla_app = gorilla_app
+        self.app = gorilla_app()
+
+    def get_application(self):
+        global plugins_context_rebuild
+        if plugins_context_rebuild:
+            self.app = self.gorilla_app()
+            plugins_context_rebuild = False
+
+        return self.app
+
+    def __call__(self, environ, start_response):
+        app = self.get_application()
+        return app(environ, start_response)
 
 
 @click.group(cls=FlaskGroup, create_app=create_app)
 def cli():
     os.environ['FLASK_ENV'] = 'production'
+
+
+@click.command('start-forever')
+def start_server():
+    application = AppReloader(create_app)
+    run_simple('localhost', 5000, application, use_debugger=True, use_evalex=True)

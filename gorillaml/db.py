@@ -1,5 +1,4 @@
 import click
-import subprocess
 from flask import g, current_app
 from flask.cli import with_appcontext
 from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey
@@ -19,7 +18,7 @@ class Users(Base):
     status = Column('status', String, nullable=False)
     created = Column('created', Date, nullable=False, default=datetime.now)
     plugins = relationship('Plugins', back_populates='user')
-    field_refferences = relationship('Field_refference', back_populates='user')
+    form_reference = relationship('Form_reference', back_populates='user')
 
     def __repr__(self):
         return f"<Users(username='{self.username}', password='{self.password}', role='{self.role}')>"
@@ -49,35 +48,35 @@ class Configs(Base):
         return f"<Configs(key='{self.key}', value='{self.value}')>"
 
 
-class Field_refference(Base):
-    __tablename__ = 'field_refference'
+class Form_reference(Base):
+    __tablename__ = 'form_reference'
     id = Column(Integer, primary_key=True)
     author_id = Column(Integer, ForeignKey('users.id'))
     name = Column('name', String, nullable=False)
     callback = Column('callback', String, nullable=False)
     method = Column('method', String, nullable=False)
     enctype = Column('enctype', String, nullable=True)
-    user = relationship('Users', back_populates='field_refferences')
-    field_refference_fields = relationship('Field_refference_fields', back_populates='field_refferences', order_by='Field_refference_fields.weight', cascade='save-update, merge, delete')
+    user = relationship('Users', back_populates='form_reference')
+    form_reference_fields = relationship('Form_reference_fields', back_populates='form_references', order_by='Form_reference_fields.weight', cascade='save-update, merge, delete')
 
     def __repr__(self):
-        return f"<Field_refference(name='{self.name}')>"
+        return f"<Form_reference(name='{self.name}')>"
 
 
-class Field_refference_fields(Base):
-    __tablename__ = 'field_refference_fields'
+class Form_reference_fields(Base):
+    __tablename__ = 'form_reference_fields'
     id = Column(Integer, primary_key=True)
-    fid = Column(Integer, ForeignKey('field_refference.id'))
+    fid = Column(Integer, ForeignKey('form_reference.id'))
     name = Column('name', String, nullable=False)
     title = Column('title', String, nullable=False)
     type = Column('type', String, nullable=False)
     choiced = Column('choiced', String, nullable=True)
     weight = Column('weight', Integer, nullable=False)
     required = Column('required', String, nullable=False)
-    field_refferences = relationship('Field_refference', back_populates='field_refference_fields')
+    form_references = relationship('Form_reference', back_populates='form_reference_fields')
 
     def __repr__(self):
-        return f"<Field_refference_fields(name='{self.name}', type='{self.type}')>"
+        return f"<Form_reference_fields(name='{self.name}', type='{self.type}')>"
 
 
 def get_db():
@@ -118,7 +117,6 @@ def init_db():
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
-    app.cli.add_command(start_server)
 
 
 @click.command('init-db')
@@ -126,9 +124,3 @@ def init_app(app):
 def init_db_command():
     init_db()
     click.echo('Initialized the database.')
-
-
-@click.command('start-forever')
-def start_server():
-    while True:
-        subprocess.run(["gorillaml-canvas", "run"])

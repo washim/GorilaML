@@ -16,14 +16,15 @@
 </div>
 {%- endmacro %}
 
-{% macro gform(form_id, form=None, fields=None, form_methods='POST', fields_content=None, form_enctype=None) -%}
+{% macro gform(form_id, form=None, fields=None, form_methods='POST', fields_content=None, form_enctype=None, extra=None) -%}
 <form id="{{ form_id }}" role="form" {% if form_enctype %}enctype="multipart/form-data" {% endif %}method="{{ form_methods }}">
     {% if fields %}
     {{ form.csrf_token }}
     {% for field in fields %}
-    <div class="form-group{% if form[field].errors %} has-error{% endif %}">
+    <div class="form-group {{form[field].name}} {% if form[field].errors %} has-error{% endif %}">
         {{ form[field].label }} {% if form[field].flags.required %}<span class="text-danger">*</span>{% endif %}
         {{ form[field](class_="form-control") }}
+        {{ extra[form[field].name]|safe }}
         {% for message in form[field].errors %}
         <span class="help-block small">{{ message }}</span>
         {% endfor %}
