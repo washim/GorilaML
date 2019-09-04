@@ -2,17 +2,15 @@
 
 {% block content %}
 <div class="row">
-    {% set footer %}
-    <button type="Create" class="btn btn-primary" frmtarget="#form_change_password">Change Password</button>
-    {% endset %}
-
-    {% call widget.gcard(title='Create new user', footer=footer) %}
-    {{ widget.gform('form_change_password', form, ['current_password','password','confirm']) }}
-    {% endcall %}
+    {{ widget.gorillaml_custom_form(metadata) }}
 
     {% if role == 'admin' %}
         {% call widget.gcard(title='Recreate Plugins Cache') %}
-    <a href="{{ url_for('plugins_cache_recreate') }}"><div class="loading-plugins-cache" data-intro='You have to recreate plugin cache everytime when you made changes in code-base to see the changes.'><button class="btn btn-danger btn-recreate">Recreate</button></div></a>
+        <a href="{{ url_for('plugins_cache_recreate') }}">
+            <div class="loading-plugins-cache" data-intro='You have to recreate plugin cache everytime when you made changes in code-base to see the changes.'>
+                <button class="btn btn-danger btn-recreate">Recreate</button>
+            </div>
+        </a>
         {% endcall %}
     {% endif %}
 </div>

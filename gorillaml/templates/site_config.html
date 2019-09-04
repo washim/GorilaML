@@ -2,12 +2,6 @@
 
 {% block content %}
 <div class="row">
-    {% set footer %}
-    <button type="submit" class="btn btn-primary" frmtarget="#form_site_config">Save Config</button>
-    {% endset %}
-
-    {% call widget.gcard(title='Site Configurations', footer=footer) %}
-    {{ widget.gform('form_site_config', form, ['site_logo','site_name', 'site_slogan', 'page_title', 'copyrights'], form_enctype='Yes') }}
-    {% endcall %}
+    {{ widget.gorillaml_custom_form(metadata) }}
 </div>
 {% endblock %}

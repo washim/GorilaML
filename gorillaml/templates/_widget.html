@@ -16,22 +16,25 @@
 </div>
 {%- endmacro %}
 
-{% macro gform(form_id, form=None, fields=None, form_methods='POST', fields_content=None, form_enctype=None, extra=None) -%}
-<form id="{{ form_id }}" role="form" {% if form_enctype %}enctype="multipart/form-data" {% endif %}method="{{ form_methods }}">
-    {% if fields %}
+{% macro gorillaml_custom_form(metadata) -%}
+    {% call gcard(title=metadata.info.title, class=metadata.info.class, body_class=metadata.info.body_class, type=metadata.info.type, footer=metadata.info.footer) %}
+        {{ gform(form_id=metadata.form_data.form_id, form=metadata.form_data.form, method=metadata.form_data.method, encryption=metadata.form_data.encryption, extra=metadata.form_data.extra) }}
+    {% endcall %}
+{%- endmacro %}
+
+{% macro gform(form_id, form, method, encryption, extra) -%}
+<form id="{{ form_id }}" role="form" {% if encryption %}enctype="{{ encryption }}"{% endif %} method="{{ method }}">
     {{ form.csrf_token }}
-    {% for field in fields %}
-    <div class="form-group {{form[field].name}} {% if form[field].errors %} has-error{% endif %}">
-        {{ form[field].label }} {% if form[field].flags.required %}<span class="text-danger">*</span>{% endif %}
-        {{ form[field](class_="form-control") }}
-        {{ extra[form[field].name]|safe }}
-        {% for message in form[field].errors %}
+    {% for field in form %}
+    <div class="form-group {{field.name}} {% if field.errors %} has-error{% endif %}">
+        {{ field.label }} {% if field.flags.required %}<span class="text-danger">*</span>{% endif %}
+        {{ field(class_="form-control") }}
+        {{ extra[field.name]|safe }}
+        {% for message in field.errors %}
         <span class="help-block small">{{ message }}</span>
         {% endfor %}
     </div>
     {% endfor %}
-    {% endif %}
-    {% if fields_content %} {{ fields_content }} {% endif %}
 </form>
 {%- endmacro %}
 

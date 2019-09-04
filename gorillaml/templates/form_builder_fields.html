@@ -2,14 +2,7 @@
 
 {% block content %}
 <div class="row">
-    {% set footer %}
-    <button class="btn btn-primary" frmtarget="#form_field_reff_fields">Save Field</button>
-    {% endset %}
-
-    {% call widget.gcard(title='Save field', class='col-md-3', footer=footer) %}
-    {{ widget.gform('form_field_reff_fields', form, ['name', 'title', 'type', 'weight', 'choiced', 'required'], extra={'choiced':'<div id="choiced-editor"></div>'}) }}
-    {% endcall %}
-
+    {{ widget.gorillaml_custom_form(metadata) }}
     {% call widget.gcard(title=field_reff_fields.name + ' field collections', class='col-md-9', body_class='p-0') %}
     <table class="table table-striped">
         <tbody>

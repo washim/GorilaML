@@ -2,13 +2,7 @@
 
 {% block content %}
 <div class="row">
-    {% set footer %}
-    <button type="Create" class="btn btn-primary" frmtarget="#form_register_user">Save user</button>
-    {% endset %}
-
-    {% call widget.gcard(title=form_title, class='col-md-5', footer=footer) %}
-    {{ widget.gform('form_register_user', form, ['username','password','confirm','role','status']) }}
-    {% endcall %}
+    {{ widget.gorillaml_custom_form(metadata) }}
 
     <div class="col-md-7">
         {% call widget.gcard(title='Plugins shortcut', class='', body_class='p-0') %}

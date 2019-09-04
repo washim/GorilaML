@@ -2,12 +2,6 @@
 
 {% block content %}
 <div class="row">
-    {% set footer %}
-    <button type="submit" class="btn btn-primary" frmtarget="#form_register_plugin">Register</button>
-    {% endset %}
-
-    {% call widget.gcard(title='Register your plugin from your local machine', footer=footer) %}
-    {{ widget.gform('form_register_plugin', form, ['local_plugin_name','local_plugin_path']) }}
-    {% endcall %}
+    {{ widget.gorillaml_custom_form(metadata) }}
 </div>
 {% endblock %}

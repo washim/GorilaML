@@ -2,12 +2,6 @@
 
 {% block content %}
 <div class="row">
-    {% set footer %}
-    <button type="submit" class="btn btn-primary" frmtarget="#form_addon_upload">Upload</button>
-    {% endset %}
-
-    {% call widget.gcard(title='Upload your plugin', footer=footer) %}
-    {{ widget.gform('form_addon_upload', form, ['upload'], form_enctype='Yes') }}
-    {% endcall %}
+    {{ widget.gorillaml_custom_form(metadata) }}
 </div>
 {% endblock %}

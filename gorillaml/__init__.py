@@ -33,7 +33,7 @@ def create_app():
     app.config.from_mapping(
         SECRET_KEY=os.urandom(12),
         PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons'),
-        VERSION='0.1.2'
+        VERSION='0.1.3'
     )
 
     CORS(app)
@@ -84,7 +84,24 @@ def create_app():
                 url_for('plugin_upload')
             )
 
-        return render_template('plugin_upload.html', form=plugin)
+        metadata = {
+            'info': {
+                'title': 'Upload your plugin',
+                'class': 'col-md-12',
+                'body_class': None,
+                'type': None,
+                'footer': '<button type="Create" class="btn btn-primary" frmtarget="#form_addon_upload">Upload</button>'
+            },
+            'form_data': {
+                'form_id': 'form_addon_upload',
+                'form': plugin,
+                'method': 'POST',
+                'encryption': 'multipart/form-data',
+                'extra': None
+            }
+        }
+
+        return render_template('plugin_upload.html', metadata=metadata)
 
     @app.route('/register-local', methods=['GET', 'POST'])
     @authorize
@@ -108,7 +125,24 @@ def create_app():
                 url_for('register_local')
             )
 
-        return render_template('register_local.html', form=local_plugin)
+        metadata = {
+            'info': {
+                'title': 'Register your plugin from your local machine',
+                'class': 'col-md-12',
+                'body_class': None,
+                'type': None,
+                'footer': '<button type="submit" class="btn btn-primary" frmtarget="#form_register_plugin">Register</button>'
+            },
+            'form_data': {
+                'form_id': 'form_register_plugin',
+                'form': local_plugin,
+                'method': 'POST',
+                'encryption': None,
+                'extra': None
+            }
+        }
+
+        return render_template('register_local.html', metadata=metadata)
 
     @app.route('/site-config', methods=['GET','POST'])
     @admin_login_required
@@ -156,7 +190,24 @@ def create_app():
             flash('Configuration updated successfully.', 'success')
             return redirect(url_for('site_config'))
 
-        return render_template('site_config.html', form=config, context=dict(site_logo=sitedata['site_logo']))
+        metadata = {
+            'info': {
+                'title': 'Site Configurations',
+                'class': 'col-md-12',
+                'body_class': None,
+                'type': None,
+                'footer': '<button type="submit" class="btn btn-primary" frmtarget="#form_site_config">Save Config</button>'
+            },
+            'form_data': {
+                'form_id': 'form_site_config',
+                'form': config,
+                'method': 'POST',
+                'encryption': 'multipart/form-data',
+                'extra': None
+            }
+        }
+
+        return render_template('site_config.html', metadata=metadata)
 
     @app.route('/plugins-cache-recreate', methods=['GET', 'POST'])
     @admin_login_required
@@ -257,7 +308,24 @@ def create_app():
 
             redirect(url_for('create_user'))
 
-        return render_template('create_user.html', form=createuser, plugins=user_plugins)
+        metadata = {
+            'info': {
+                'title': 'Create User',
+                'class': 'col-md-5',
+                'body_class': None,
+                'type': None,
+                'footer': '<button type="Create" class="btn btn-primary" frmtarget="#form_register_user">Save user</button>'
+            },
+            'form_data': {
+                'form_id': 'form_register_user',
+                'form': createuser,
+                'method': 'POST',
+                'encryption': None,
+                'extra': None
+            }
+        }
+
+        return render_template('create_user.html', metadata=metadata, plugins=user_plugins)
 
     @app.route('/list-users')
     @admin_login_required
@@ -307,7 +375,24 @@ def create_app():
             flash('Password updated successfully.', 'success')
             return redirect(url_for('logout'))
 
-        return render_template('myaccount.html', form=myaccount, token=securetoken())
+        metadata = {
+            'info': {
+                'title': 'Create new user',
+                'class': 'col-md-12',
+                'body_class': None,
+                'type': None,
+                'footer': '<button type="Create" class="btn btn-primary" frmtarget="#form_change_password">Change Password</button>'
+            },
+            'form_data': {
+                'form_id': 'form_change_password',
+                'form': myaccount,
+                'method': 'POST',
+                'encryption': None,
+                'extra': None
+            }
+        }
+
+        return render_template('myaccount.html', metadata=metadata, token=securetoken())
 
     @app.route('/logout')
     @authorize
@@ -388,12 +473,26 @@ def create_app():
 
                         return redirect(url_for('form_builder', action=action, fid=fid))
 
-                    return render_template(
-                        'form_builder_fields.html',
-                        form=formbuilder_fields,
-                        action=action,
-                        field_reff_fields=field_reff
-                    )
+                    metadata = {
+                        'info': {
+                            'title': 'Save field',
+                            'class': 'col-md-3',
+                            'body_class': None,
+                            'type': None,
+                            'footer': '<button class="btn btn-primary" frmtarget="#form_field_reff_fields">Save Field</button>'
+                        },
+                        'form_data': {
+                            'form_id': 'form_field_reff_fields',
+                            'form': formbuilder_fields,
+                            'method': 'POST',
+                            'encryption': None,
+                            'extra': {
+                                'choiced': '<div id="choiced-editor"></div>'
+                            }
+                        }
+                    }
+
+                    return render_template('form_builder_fields.html', metadata=metadata, action=action, field_reff_fields=field_reff)
 
                 else:
                     flash('Permission denied.', 'error')
@@ -415,7 +514,24 @@ def create_app():
                     dbconn.commit()
                     return redirect(url_for('form_builder'))
 
-                return render_template('form_builder.html', form=formbuilder, action=action, fid=fid, collections=collections)
+                metadata = {
+                    'info': {
+                        'title': 'Form Builder',
+                        'class': 'col-md-3',
+                        'body_class': None,
+                        'type': None,
+                        'footer': '<button class="btn btn-primary" frmtarget="#form_field_reff">Save Form</button>'
+                    },
+                    'form_data': {
+                        'form_id': 'form_field_reff',
+                        'form': formbuilder,
+                        'method': 'POST',
+                        'encryption': None,
+                        'extra': None
+                    }
+                }
+
+                return render_template('form_builder.html', metadata=metadata, action=action, fid=fid, collections=collections)
 
         elif action == 'delete':
             if fid:
@@ -440,7 +556,24 @@ def create_app():
                 dbconn.refresh(field_reff)
                 return redirect(url_for('form_builder'))
 
-            return render_template('form_builder.html', form=formbuilder, collections=collections)
+            metadata = {
+                'info': {
+                    'title': 'Form Builder',
+                    'class': 'col-md-3',
+                    'body_class': None,
+                    'type': None,
+                    'footer': '<button class="btn btn-primary" frmtarget="#form_field_reff">Save Form</button>'
+                },
+                'form_data': {
+                    'form_id': 'form_field_reff',
+                    'form': formbuilder,
+                    'method': 'POST',
+                    'encryption': None,
+                    'extra': None
+                }
+            }
+
+            return render_template('form_builder.html', metadata=metadata, collections=collections)
 
     @app.errorhandler(404)
     def page_not_found(error_code):
