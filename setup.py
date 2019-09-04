@@ -5,7 +5,7 @@ with open('README.rst') as f:
 
 setup(
     name='gorillaml',
-    version='0.1.1',
+    version='0.1.2',
     packages=['gorillaml'],
     license='MIT license',
     url="https://www.gorillaml.com",
@@ -19,20 +19,21 @@ setup(
     python_requires='>=3',
     include_package_data=True,
     install_requires=[
-        'Flask>=1.1.1',
-        'Flask-WTF>=0.14.2',
-        'WTForms>=2.2.1',
-        'Werkzeug>=0.15.5',
-        'Flask-Cors>=3.0.8',
-        'SQLAlchemy>=1.3.6',
-        'click>=7.0',
-        'watchdog>=0.9.0',
-        'beautifulsoup4>=4.8.0',
-        'requests>=2.22.0',
-        'mpld3>=0.3',
-        'scipy>=1.3.1',
-        'pandas>=0.25.1',
-        'matplotlib>=3.1.1'
+        'Flask',
+        'Flask-WTF',
+        'WTForms',
+        'Werkzeug',
+        'Flask-Cors',
+        'SQLAlchemy',
+        'click',
+        'watchdog',
+        'beautifulsoup4',
+        'requests',
+        'mpld3',
+        'scipy',
+        'pandas',
+        'matplotlib',
+        'PyQt5<5.13'
     ],
     entry_points={
         'console_scripts': [

@@ -3,8 +3,10 @@ import sys
 import click
 import shutil
 import importlib
+import threading
 from ast import literal_eval
 from datetime import datetime
+from PyQt5 import QtWidgets
 from werkzeug.utils import secure_filename
 from werkzeug.serving import run_simple
 from flask_wtf import FlaskForm
@@ -12,6 +14,7 @@ from flask_cors import CORS
 from flask.cli import FlaskGroup
 from gorillaml import db
 from gorillaml import form
+from gorillaml.widget import Ui_MainWindow
 from gorillaml.lab import (
     authorize, admin_login_required, securetoken, check_new_version
 )
@@ -30,7 +33,7 @@ def create_app():
     app.config.from_mapping(
         SECRET_KEY=os.urandom(12),
         PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons'),
-        VERSION='0.1.1'
+        VERSION='0.1.2'
     )
 
     CORS(app)
@@ -569,6 +572,7 @@ def create_app():
         return site_context
 
     app.cli.add_command(start_server)
+    app.cli.add_command(gui)
     return app
 
 
@@ -598,4 +602,19 @@ def cli():
 @click.command('start-forever')
 def start_server():
     application = AppReloader(create_app)
-    run_simple('localhost', 5000, application, use_debugger=True, use_evalex=True)
+    run_simple('localhost', 5000, application, use_reloader=False, use_debugger=True)
+
+
+@click.command('gui')
+def gui():
+    application = AppReloader(create_app)
+    threading.Thread(target=run_simple, args=('localhost', 5000, application, False, True), daemon=True).start()
+
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    MainWindow.setMinimumSize(1052, 799)
+    MainWindow.showMaximized()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
