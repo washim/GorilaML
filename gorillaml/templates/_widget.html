@@ -17,7 +17,16 @@
 {%- endmacro %}
 
 {% macro gorillaml_custom_form(metadata) -%}
-    {% call gcard(title=metadata.info.title, class=metadata.info.class, body_class=metadata.info.body_class, type=metadata.info.type, footer=metadata.info.footer) %}
+    {% set footer={} %}
+    {% for field in metadata.form_data.form %}
+        {% if field.type == 'SubmitField' %}
+            {% set btn %}
+            <button class="btn btn-primary" frmtarget="#{{ metadata.form_data.form_id }}">{{ field.label|striptags }}</button>
+            {% endset %}
+            {% set footer=footer.__setitem__(field.type, btn) %}
+        {% endif %}
+    {% endfor %}
+    {% call gcard(title=metadata.info.title, class=metadata.info.class, body_class=metadata.info.body_class, type=metadata.info.type, footer=footer.SubmitField) %}
         {{ gform(form_id=metadata.form_data.form_id, form=metadata.form_data.form, method=metadata.form_data.method, encryption=metadata.form_data.encryption, extra=metadata.form_data.extra) }}
     {% endcall %}
 {%- endmacro %}
@@ -26,14 +35,16 @@
 <form id="{{ form_id }}" role="form" {% if encryption %}enctype="{{ encryption }}"{% endif %} method="{{ method }}">
     {{ form.csrf_token }}
     {% for field in form %}
-    <div class="form-group {{field.name}} {% if field.errors %} has-error{% endif %}">
-        {{ field.label }} {% if field.flags.required %}<span class="text-danger">*</span>{% endif %}
-        {{ field(class_="form-control") }}
-        {{ extra[field.name]|safe }}
-        {% for message in field.errors %}
-        <span class="help-block small">{{ message }}</span>
-        {% endfor %}
-    </div>
+        {% if field.type != 'SubmitField' %}
+        <div class="form-group {{field.name}} {% if field.errors %} has-error{% endif %}">
+            {{ field.label }} {% if field.flags.required %}<span class="text-danger">*</span>{% endif %}
+            {{ field(class_="form-control") }}
+            {{ extra[field.name]|safe }}
+            {% for message in field.errors %}
+            <span class="help-block small">{{ message }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
     {% endfor %}
 </form>
 {%- endmacro %}
@@ -51,17 +62,17 @@
                 {{ form.csrf_token }}
                 <table cellpadding="5">
                     {% for field in form.elements %}
-                    {% if field.type != 'SubmitField' %}
-                    <tr>
-                        <td>{{ field.label }} {% if field.flags.required %}<span class="text-danger">*</span>{% endif %}</td>
-                        <td>{{ field(class_="form-control") }}</td>
-                        <td>
-                            {% for message in field.errors %}
-                                <div class="text-danger">{{ message }}</div>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                    {% endif %}
+                        {% if field.type != 'SubmitField' %}
+                        <tr>
+                            <td>{{ field.label }} {% if field.flags.required %}<span class="text-danger">*</span>{% endif %}</td>
+                            <td>{{ field(class_="form-control") }}</td>
+                            <td>
+                                {% for message in field.errors %}
+                                    <div class="text-danger">{{ message }}</div>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endif %}
                     {% endfor %}
                 </table>
             </form>

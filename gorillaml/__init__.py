@@ -646,7 +646,7 @@ def create_app():
                         setattr(FormBuilderForm, field.name, FileField(field.title, [validators.DataRequired()]))
 
                     elif field.type == 'SubmitField':
-                        setattr(FormBuilderForm, field.name, SubmitField(field.title, [validators.DataRequired()]))
+                        setattr(FormBuilderForm, field.name, SubmitField(field.title))
 
                     elif field.type == 'FloatField':
                         setattr(FormBuilderForm, field.name, FloatField(field.title, [validators.DataRequired()]))
