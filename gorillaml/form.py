@@ -36,10 +36,7 @@ def plugin_validate(form, field):
 
 def register_plugin_validate(form, field):
     if os.path.isdir(field.data) == False:
-        raise ValidationError('Plugin path does not exist')
-    
-    elif os.path.isdir(os.path.join(field.data, form.local_plugin_name.data)) == False:
-        raise ValidationError('Plugin name does not exist inside your plugin path')
+        raise ValidationError('Provide valid plugin path.')
 
 def password_validate(form, field):
     if session['password'] != field.data:
@@ -52,7 +49,6 @@ class PluginUploadForm(FlaskForm):
 
 
 class RegisterLocalPluginForm(FlaskForm):
-    local_plugin_name = StringField('Plugin Name', [validators.DataRequired()])
     local_plugin_path = StringField('Plugin Path', [validators.DataRequired(), register_plugin_validate])
     submit = SubmitField('Register')
 
@@ -112,4 +108,8 @@ class FormBuilderFields(FlaskForm):
     weight = SelectField('Weight', choices=[(item, item) for item in range(-100, 100, 1)], coerce=int, default=0)
     choiced = TextAreaField('Choices', default="[('key', 'value'), ('key1', 'value1')]")
     required = SelectField('Required', choices=[('yes', 'Yes'), ('no', 'No')])
+    submit = SubmitField('Save')
+
+class FileManager(FlaskForm):
+    content = TextAreaField('Content', [validators.DataRequired()])
     submit = SubmitField('Save')

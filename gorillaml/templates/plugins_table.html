@@ -18,7 +18,7 @@
             <td>{{ plugin.plugin_path }}</td>
             <td>{{ plugin.user.username }}</td>
             <td>{{ plugin.created }}</td>
-            {% if role == 'admin' %}<td>{% if plugin.status in [0,2] %}<a href="{{ url_for('plugin_activation', status='installed', pid=plugin.id) }}" title="Approve this plugin"><i class="fas fa-thumbs-up"></i></a> {% else %}<a href="{{ url_for('plugin_activation', status='uninstalled', pid=plugin.id) }}" title="Reject this plugin"><i class="fas fa-thumbs-down"></i></a>{% endif %} <a href="{{ url_for('plugin_activation', status='delete', pid=plugin.id) }}" title="Delete this plugin"><i class="fas fa-trash"></i></a></td>{% endif %}
+            {% if role == 'admin' %}<td>{% if plugin.status in [0,2] %}<a href="{{ url_for('plugin_activation', status='installed', pid=plugin.id) }}" title="Approve this plugin"><i class="fas fa-thumbs-up"></i></a> {% else %}<a href="{{ url_for('plugin_activation', status='uninstalled', pid=plugin.id) }}" title="Reject this plugin"><i class="fas fa-thumbs-down"></i></a>{% endif %} <a href="{{ url_for('file_manager', action='open', pid=plugin.id) }}" title="File manager"><i class="fas fa-file-code"></i></a> <a href="{{ url_for('plugin_activation', status='delete', pid=plugin.id) }}" title="Delete this plugin"><i class="fas fa-trash"></i></a></td>{% endif %}
         </tr>
         {% endfor %}
         {% else %}

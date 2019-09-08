@@ -41,8 +41,12 @@
 {% endblock %}
 
 {% block javascript %}
+var myCodeMirror = CodeMirror.fromTextArea(document.getElementById('choiced'), {
+    lineNumbers: true,
+    styleActiveLine: true,
+    matchBrackets: true
+});
 var choiced_textarea = $('textarea[name="choiced"]');
-choiced_textarea.hide()
 if($('#type').val() == 'SelectField' || $('#type').val() == 'SelectMultipleField') {
     $('.choiced').show();
 }
@@ -57,10 +61,5 @@ $('#type').bind('change', function() {
         $('.choiced').hide();
     }
     return false;
-});
-var choiced_editor = ace.edit('choiced-editor');
-choiced_editor.setValue(choiced_textarea.val());
-choiced_editor.getSession().on('change', function(){
-  choiced_textarea.val(choiced_editor.getSession().getValue());
 });
 {% endblock %}

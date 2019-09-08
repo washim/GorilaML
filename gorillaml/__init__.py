@@ -4,6 +4,7 @@ import click
 import shutil
 import importlib
 import threading
+import platform
 from ast import literal_eval
 from datetime import datetime
 from PyQt5 import QtWidgets
@@ -89,8 +90,7 @@ def create_app():
                 'title': 'Upload your plugin',
                 'class': 'col-md-12',
                 'body_class': None,
-                'type': None,
-                'footer': '<button type="Create" class="btn btn-primary" frmtarget="#form_addon_upload">Upload</button>'
+                'type': None
             },
             'form_data': {
                 'form_id': 'form_addon_upload',
@@ -109,14 +109,20 @@ def create_app():
         dbconn = db.get_db()
         local_plugin = form.RegisterLocalPluginForm()
 
+        if platform.system() == 'Windows':
+            separator = '\\'
+        else:
+            separator = '/'
+
         if local_plugin.validate_on_submit():
             try:
-                add_plugins = db.Plugins(author_id=session['user_id'], name=local_plugin.local_plugin_name.data,
-                                         plugin_path=local_plugin.local_plugin_path.data)
+                local_plugin_parent_path, local_plugin_name = str(local_plugin.local_plugin_path.data).rsplit(separator, 1)
+                add_plugins = db.Plugins(author_id=session['user_id'], name=local_plugin_name,
+                                         plugin_path=local_plugin_parent_path)
                 dbconn.add(add_plugins)
                 dbconn.commit()
             except:
-                flash('Plugin already exist. It should be unique for each upload.', 'error')
+                flash('Plugin already exist.', 'error')
                 return redirect(url_for('register_local'))
 
             flash('Your plugin successfully uploaded and pending for approval.', 'success')
@@ -130,8 +136,7 @@ def create_app():
                 'title': 'Register your plugin from your local machine',
                 'class': 'col-md-12',
                 'body_class': None,
-                'type': None,
-                'footer': '<button type="submit" class="btn btn-primary" frmtarget="#form_register_plugin">Register</button>'
+                'type': None
             },
             'form_data': {
                 'form_id': 'form_register_plugin',
@@ -195,8 +200,7 @@ def create_app():
                 'title': 'Site Configurations',
                 'class': 'col-md-12',
                 'body_class': None,
-                'type': None,
-                'footer': '<button type="submit" class="btn btn-primary" frmtarget="#form_site_config">Save Config</button>'
+                'type': None
             },
             'form_data': {
                 'form_id': 'form_site_config',
@@ -208,6 +212,78 @@ def create_app():
         }
 
         return render_template('site_config.html', metadata=metadata)
+
+    @app.route('/file-manager/<string:action>/<int:pid>', methods=['GET', 'POST'])
+    @admin_login_required
+    @authorize
+    def file_manager(action, pid):
+        def convert_date(timestamp):
+            d = datetime.utcfromtimestamp(timestamp)
+            formated_date = d.strftime('%d %b %Y')
+            return formated_date
+
+        files = []
+        dbconn = db.get_db()
+        plugin = dbconn.query(db.Plugins).get(pid)
+
+        if action == 'open':
+            if plugin.plugin_path == 'system':
+                dir_entries = os.scandir(os.path.join(app.config['PLUGIN_UPLOAD_FOLDER'], session['username'], plugin.name))
+            else:
+                dir_entries = os.scandir(os.path.join(plugin.plugin_path, plugin.name))
+
+        elif action == 'edit':
+            if request.args.get('path'):
+                if os.path.isdir(request.args.get('path')):
+                    dir_entries = os.scandir(request.args.get('path'))
+                else:
+                    fp = open(request.args.get('path'), encoding='utf-8')
+                    file_content = fp.read()
+                    fp.close()
+                    editor = form.FileManager(content=file_content)
+                    if editor.validate_on_submit():
+                        fp = open(request.args.get('path'), 'wb')
+                        fp.write(str(editor.content.data).encode('utf-8'))
+                        fp.close()
+                        flash('File updated successfully.', 'success')
+                        return redirect(request.url)
+
+                    metadata = {
+                        'info': {
+                            'title': 'Edit file inside your plugin',
+                            'class': 'col-md-12',
+                            'body_class': None,
+                            'type': None
+                        },
+                        'form_data': {
+                            'form_id': 'form_edit_file',
+                            'form': editor,
+                            'method': 'POST',
+                            'encryption': None,
+                            'extra': None
+                        }
+                    }
+
+                    return render_template('filemanger.html', metadata=metadata, files=files, action=action, pid=pid)
+            else:
+                dir_entries = os.scandir(os.path.join(plugin.plugin_path, plugin.name))
+
+        elif action == 'delete':
+            if request.args.get('path'):
+                if os.path.isfile(request.args.get('path')):
+                    os.remove(request.args.get('path'))
+                    flash('File deleted successfully.', 'success')
+                else:
+                    flash('Directory deletion not allowed.', 'error')
+            else:
+                flash('File not found for deletion.', 'error')
+
+            return redirect(url_for('file_manager', action='open', pid=pid))
+
+        for entry in dir_entries:
+            files.append(dict(name=entry.name, path=os.path.abspath(entry), last_modified=convert_date(entry.stat().st_mtime)))
+
+        return render_template('filemanger.html', metadata=[], files=files, action=action, pid=pid)
 
     @app.route('/plugins-cache-recreate', methods=['GET', 'POST'])
     @admin_login_required
@@ -313,8 +389,7 @@ def create_app():
                 'title': 'Create User',
                 'class': 'col-md-5',
                 'body_class': None,
-                'type': None,
-                'footer': '<button type="Create" class="btn btn-primary" frmtarget="#form_register_user">Save user</button>'
+                'type': None
             },
             'form_data': {
                 'form_id': 'form_register_user',
@@ -380,8 +455,7 @@ def create_app():
                 'title': 'Create new user',
                 'class': 'col-md-12',
                 'body_class': None,
-                'type': None,
-                'footer': '<button type="Create" class="btn btn-primary" frmtarget="#form_change_password">Change Password</button>'
+                'type': None
             },
             'form_data': {
                 'form_id': 'form_change_password',
@@ -478,17 +552,14 @@ def create_app():
                             'title': 'Save field',
                             'class': 'col-md-3',
                             'body_class': None,
-                            'type': None,
-                            'footer': '<button class="btn btn-primary" frmtarget="#form_field_reff_fields">Save Field</button>'
+                            'type': None
                         },
                         'form_data': {
                             'form_id': 'form_field_reff_fields',
                             'form': formbuilder_fields,
                             'method': 'POST',
                             'encryption': None,
-                            'extra': {
-                                'choiced': '<div id="choiced-editor"></div>'
-                            }
+                            'extra': None
                         }
                     }
 
@@ -519,8 +590,7 @@ def create_app():
                         'title': 'Form Builder',
                         'class': 'col-md-3',
                         'body_class': None,
-                        'type': None,
-                        'footer': '<button class="btn btn-primary" frmtarget="#form_field_reff">Save Form</button>'
+                        'type': None
                     },
                     'form_data': {
                         'form_id': 'form_field_reff',
@@ -561,8 +631,7 @@ def create_app():
                     'title': 'Form Builder',
                     'class': 'col-md-3',
                     'body_class': None,
-                    'type': None,
-                    'footer': '<button class="btn btn-primary" frmtarget="#form_field_reff">Save Form</button>'
+                    'type': None
                 },
                 'form_data': {
                     'form_id': 'form_field_reff',
@@ -742,7 +811,6 @@ def start_server():
 def gui():
     application = AppReloader(create_app)
     threading.Thread(target=run_simple, args=('localhost', 5000, application, False, True), daemon=True).start()
-
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     MainWindow.setMinimumSize(1052, 799)

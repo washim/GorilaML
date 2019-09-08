@@ -18,4 +18,5 @@ label[for="csrf_token"]{display:none;}
 .form-group.has-error label {color: #dd4b39;}
 .form-group.has-error .form-control, .form-group.has-error .input-group-addon {border-color: #dd4b39;box-shadow: none;}
 .form-group.has-error .help-block {color: #dd4b39;}
-#choiced-editor{height:300px; border:1px solid #ccc;}
+#form_field_reff_fields .CodeMirror{height:300px; border:1px solid #ccc;}
+#form_edit_file .CodeMirror{height:100% !important; border:1px solid #ccc;}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    {% if metadata|length %}
+    {{ widget.gorillaml_custom_form(metadata) }}
+    {% else %}
+    {% call widget.gcard(title='Plugin file manger', body_class='p-0') %}
+    <table class="table table-striped">
+        <tbody>
+            <tr>
+                <th>Name</th>
+                <th>Last Modified</th>
+                <th>Action</th>
+            </tr>
+            {% if files|length > 0 %}
+            {% for file in files %}
+            <tr>
+                <td>{{ file.name }}</td>
+                <td>{{ file.last_modified }}</td>
+                <td><a href="{{ url_for('file_manager', action='edit', pid=pid, path=file.path) }}" title="Edit"><i class="fas fa-edit"></i></a> <a href="{{ url_for('file_manager', action='delete', pid=pid, path=file.path) }}" title="Delete"><i class="fas fa-trash"></i></a>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="3" align="center">No files found yet.</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    {% endcall %}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block javascript %}
+var myCodeMirror = CodeMirror.fromTextArea(document.getElementById('content'), {
+    lineNumbers: true,
+    styleActiveLine: true,
+    matchBrackets: true
+});
+{% endblock %}
