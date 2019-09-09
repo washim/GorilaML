@@ -50,8 +50,8 @@ def admin_login_required(fun):
             if session.get('role') == 'admin':
                 return fun(*args, **kws)
             else:
-                flash('You dont have enough permissions to open this page.', 'error')
-                return redirect(url_for('plugins'))
+                flash('Permission denied.', 'error')
+                return redirect(url_for('home'))
         else:
             return fun(*args, **kws)
 

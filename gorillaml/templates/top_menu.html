@@ -1,4 +1,11 @@
 <nav class="main-header navbar navbar-expand navbar-white navbar-light border-bottom">
+    {% if role is not defined %}
+        {% set top_menu = 'no' %}
+    {% elif role != 'presenter' %}
+        {% set top_menu = 'yes' %}
+    {% else %}
+        {% set top_menu = 'no' %}
+    {% endif %}
     <ul class="navbar-nav">
         <li class="nav-item">
             <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
@@ -6,6 +13,7 @@
         <li class="nav-item d-none d-sm-inline-block">
             <a href="/" class="nav-link">Home</a>
         </li>
+        {% if top_menu == 'yes' %}
         <li class="nav-item d-none d-sm-inline-block">
             <a href="{{ url_for('plugins') }}" class="nav-link">Plugins</a>
         </li>
@@ -18,8 +26,9 @@
         <li class="nav-item d-none d-sm-inline-block">
             <a href="https://rzp.io/l/gorillaml" class="nav-link" target="_blank" data-intro='To keep this project active and alive donate us.'>Donate</a>
         </li>
+        {% endif %}
     </ul>
-
+    {% if top_menu == 'yes' %}
     <form class="form-inline ml-3" method="get" action="{{ url_for('plugins') }}">
         <div class="input-group input-group-sm">
             <input class="form-control form-control-navbar" name="name" type="search" placeholder="Plugins Search" aria-label="Search">
@@ -30,6 +39,7 @@
             </div>
         </div>
     </form>
+    {% endif %}
 
     <ul class="navbar-nav ml-auto">
         {% if status %}

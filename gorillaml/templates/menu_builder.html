@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    {{ widget.gorillaml_custom_form(metadata) }}
+
+    {% if action == 'new' %}
+    {% call widget.gcard(title='Menu builder menu collections', class='col-md-9', body_class='p-0') %}
+        {% include 'menu_builder_table.html' %}
+    {% endcall %}
+    {% else %}
+    {% call widget.gcard(title='Menu builder menu items', class='col-md-9', body_class='p-0') %}
+        {% include 'menu_builder_item.html' %}
+    {% endcall %}
+    {% endif %}
+</div>
+{% endblock %}

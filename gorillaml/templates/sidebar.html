@@ -9,6 +9,8 @@
     </div>
 
     <nav class="mt-2">
+        {% set person = {'presenter': 'presenter'} %}
+        {% if role != person[role] %}
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
             <li class="nav-item has-treeview menu-open">
                 <a href="#" class="nav-link">
@@ -18,11 +20,6 @@
                     <li class="nav-item">
                         <a href="/" class="nav-link">
                             <i class="fas fa-home nav-icon"></i> <p>Home</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ url_for('form_builder') }}" class="nav-link" data-intro='Dynamic form builder for your plugins.' data-position='right'>
-                            <i class="fas fa-building nav-icon"></i> <p>Form Builder</p>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -38,6 +35,16 @@
                     <li class="nav-item">
                         <a href="{{ url_for('register_local') }}" class="nav-link" data-intro='Register your plugin from your local machine. Dont try this in cloud server. It is only for development purpose.' data-position='right'>
                             <i class="fas fa-cash-register nav-icon"></i> <p>Local Plugin Register</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('form_builder') }}" class="nav-link" data-intro='Dynamic form builder for your plugins.' data-position='right'>
+                            <i class="fas fa-building nav-icon"></i> <p>Form Builder</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('menu_builder') }}" class="nav-link" data-intro='Create Menu' data-position='right'>
+                            <i class="fas fa-sitemap nav-icon"></i> <p>Menu Builder</p>
                         </a>
                     </li>
                     {% if role == 'admin' %}
@@ -60,5 +67,51 @@
                 </ul>
             </li>
         </ul>
+        {% endif %}
+        {% if sidebar_menus|length %}
+            {% for smenu in sidebar_menus %}
+                {% if smenu.login_required == 'no' %}
+                    {% set show_menu = 'yes' %}
+                {% elif smenu.login_required == 'yes' and user_id is defined %}
+                    {% set show_menu = 'yes' %}
+                {% else %}
+                    {% set show_menu = 'no' %}
+                {% endif %}
+
+                {% if loop.first %}
+                    {% set expand = 'menu-open' %}
+                {% else %}
+                    {% set expand = '' %}
+                {% endif %}
+
+                {% if show_menu == 'yes' %}
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                    <li class="nav-item has-treeview {{ expand }}">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon {{ smenu.icon }}"></i> <p>{{ smenu.title }}<i class="right fas fa-angle-left"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            {% for sitem in smenu.menu_items %}
+                                {% if sitem.login_required == 'no' %}
+                                    {% set show_menu_item = 'yes' %}
+                                {% elif sitem.login_required == 'yes' and user_id is defined %}
+                                    {% set show_menu_item = 'yes' %}
+                                {% else %}
+                                    {% set show_menu_item = 'no' %}
+                                {% endif %}
+                                {% if show_menu_item == 'yes' %}
+                                <li class="nav-item">
+                                    <a href="{{ sitem.path }}" class="nav-link">
+                                        <i class="nav-icon {{ sitem.icon }}"></i> <p>{{ sitem.title }}</p>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </li>
+                </ul>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
     </nav>
 </div>

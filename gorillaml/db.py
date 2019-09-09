@@ -19,6 +19,7 @@ class Users(Base):
     created = Column('created', Date, nullable=False, default=datetime.now)
     plugins = relationship('Plugins', back_populates='user')
     form_reference = relationship('Form_reference', back_populates='user')
+    menus = relationship('Menus', back_populates='user')
 
     def __repr__(self):
         return f"<Users(username='{self.username}', password='{self.password}', role='{self.role}')>"
@@ -42,10 +43,40 @@ class Configs(Base):
     __tablename__ = 'configs'
     id = Column(Integer, primary_key=True)
     key = Column('key', String, nullable=False, unique=True)
-    value = Column('value', String, nullable=False)
+    value = Column('value', String, nullable=True)
 
     def __repr__(self):
         return f"<Configs(key='{self.key}', value='{self.value}')>"
+
+
+class Menus(Base):
+    __tablename__ = 'menus'
+    id = Column(Integer, primary_key=True)
+    author_id = Column(Integer, ForeignKey('users.id'))
+    icon = Column('icon', String, nullable=False)
+    title = Column('title', String, nullable=False)
+    weight = Column('weight', Integer, nullable=False)
+    login_required = Column('login_required', String, nullable=False)
+    user = relationship('Users', back_populates='menus')
+    menu_items = relationship('Menu_items', back_populates='menu_items', order_by='Menu_items.weight', cascade='save-update, merge, delete')
+
+    def __repr__(self):
+        return f"<Menus(author_id='{self.author_id}', title='{self.title}', weight='{self.weight}')>"
+
+
+class Menu_items(Base):
+    __tablename__ = 'menu_items'
+    id = Column(Integer, primary_key=True)
+    mid = Column(Integer, ForeignKey('menus.id'))
+    icon = Column('icon', String, nullable=False)
+    title = Column('title', String, nullable=False)
+    path = Column('path', String, nullable=False)
+    weight = Column('weight', Integer, nullable=False)
+    login_required = Column('login_required', String, nullable=False)
+    menu_items = relationship('Menus', back_populates='menu_items')
+
+    def __repr__(self):
+        return f"<Menu_items(mid='{self.mid}', title='{self.title}', weight='{self.weight}')>"
 
 
 class Form_reference(Base):
@@ -107,7 +138,8 @@ def init_db():
     session.add(Configs(key='site_name', value='GorillaML'))
     session.add(Configs(key='site_slogan', value='Gorilla Managed Lab'))
     session.add(Configs(key='page_title', value='Gorilla Managed Lab'))
-    session.add(Configs(key='copyrights', value='yes'))
+    session.add(Configs(key='login_redirect', value='/'))
+    session.add(Configs(key='copyrights', value=''))
     session.add(Configs(key='available_version', value=current_app.config['VERSION']))
     session.add(Configs(key='available_version_check_date', value=datetime.today()))
     session.commit()

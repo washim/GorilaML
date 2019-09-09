@@ -61,6 +61,131 @@ def create_app():
 
         return render_template('home.html', users=users, plugins=plugins)
 
+    @app.route('/menu-builder/<string:action>/<int:mid>/<string:caction>/<int:id>', methods=['GET', 'POST'])
+    @app.route('/menu-builder/<string:action>/<int:mid>', methods=['GET', 'POST'])
+    @app.route('/menu-builder', methods=['GET', 'POST'])
+    @authorize
+    def menu_builder(action=None, mid=None, caction=None, id=None):
+        dbconn = db.get_db()
+        if mid:
+            check_menu = dbconn.query(db.Menus).filter((db.Menus.id == mid) & (db.Menus.author_id == session['user_id'])).first()
+            if check_menu is None:
+                flash('Permission denied.', 'error')
+                return redirect(url_for('menu_builder'))
+
+        if action == 'delete':
+            menu = dbconn.query(db.Menus).get(mid)
+            dbconn.delete(menu)
+            dbconn.commit()
+            flash('Menu deleted successfully.', 'success')
+            return redirect(url_for('menu_builder'))
+
+        elif action == 'open':
+            if caction == 'delete':
+                menu_item = dbconn.query(db.Menu_items).get(id)
+                dbconn.delete(menu_item)
+                dbconn.commit()
+                flash('Menu item deleted successfully.', 'success')
+                return redirect(url_for('menu_builder', action=action, mid=mid))
+
+            menu_builder = form.MenuBuilderItem()
+            menus = dbconn.query(db.Menus).get(mid)
+
+            if menu_builder.validate_on_submit():
+                if caction == 'edit':
+                    dbconn.query(db.Menu_items).filter(db.Menu_items.id == id).update({'icon': menu_builder.icon.data, 'title': menu_builder.title.data, 'path': menu_builder.path.data, 'weight': menu_builder.weight.data, 'login_required': menu_builder.login_required.data})
+                    dbconn.commit()
+                    flash('Menu item updated successfully.', 'success')
+                    return redirect(url_for('menu_builder', action=action, mid=mid, caction=caction, id=id))
+
+                else:
+                    add_menu_itmes = db.Menu_items()
+                    add_menu_itmes.mid = mid
+                    add_menu_itmes.icon = menu_builder.icon.data
+                    add_menu_itmes.title = menu_builder.title.data
+                    add_menu_itmes.path = menu_builder.path.data
+                    add_menu_itmes.weight = menu_builder.weight.data
+                    add_menu_itmes.login_required = menu_builder.login_required.data
+                    dbconn.add(add_menu_itmes)
+                    dbconn.commit()
+                    flash('Menu item created successfully.', 'success')
+                    return redirect(url_for('menu_builder', action=action, mid=mid))
+
+            if caction == 'edit':
+                mitem = dbconn.query(db.Menu_items).get(id)
+                menu_builder.icon.data = mitem.icon
+                menu_builder.title.data = mitem.title
+                menu_builder.path.data = mitem.path
+                menu_builder.weight.data = mitem.weight
+                menu_builder.login_required.data = mitem.login_required
+
+            metadata = {
+                'info': {
+                    'title': 'Save menu items',
+                    'class': 'col-md-3',
+                    'body_class': None,
+                    'type': None
+                },
+                'form_data': {
+                    'form_id': 'form_menu_builder',
+                    'form': menu_builder,
+                    'method': 'POST',
+                    'encryption': None,
+                    'extra': None
+                }
+            }
+
+            return render_template('menu_builder.html', metadata=metadata, menus=menus, action=action, caction=caction)
+
+        else:
+            menus = dbconn.query(db.Menus).filter(db.Menus.author_id == session['user_id']).order_by(db.Menus.weight).all()
+            menu_builder = form.MenuBuilder()
+
+            if menu_builder.validate_on_submit():
+                if action == 'edit':
+                    dbconn.query(db.Menus).filter(db.Menus.id == mid).update({'icon': menu_builder.icon.data, 'title': menu_builder.title.data, 'weight': menu_builder.weight.data, 'login_required': menu_builder.login_required.data})
+                    dbconn.commit()
+                    flash('Menu updated successfully.', 'success')
+                    return redirect(url_for('menu_builder', action=action, mid=mid))
+
+                else:
+                    add_menu = db.Menus()
+                    add_menu.author_id = session['user_id']
+                    add_menu.icon = menu_builder.icon.data
+                    add_menu.title = menu_builder.title.data
+                    add_menu.weight = menu_builder.weight.data
+                    add_menu.login_required = menu_builder.login_required.data
+                    dbconn.add(add_menu)
+                    dbconn.commit()
+
+                flash('Menu created successfully.', 'success')
+                return redirect(url_for('menu_builder'))
+
+            if action == 'edit':
+                menu = dbconn.query(db.Menus).get(mid)
+                menu_builder.icon.data = menu.icon
+                menu_builder.title.data = menu.title
+                menu_builder.weight.data = menu.weight
+                menu_builder.login_required.data = menu.login_required
+
+            metadata = {
+                'info': {
+                    'title': 'Save menu',
+                    'class': 'col-md-3',
+                    'body_class': None,
+                    'type': None
+                },
+                'form_data': {
+                    'form_id': 'form_menu_builder',
+                    'form': menu_builder,
+                    'method': 'POST',
+                    'encryption': None,
+                    'extra': None
+                }
+            }
+
+            return render_template('menu_builder.html', metadata=metadata, menus=menus, action='new')
+
     @app.route('/plugin-upload', methods=['GET', 'POST'])
     @authorize
     def plugin_upload():
@@ -167,11 +292,12 @@ def create_app():
                 sitedata['site_slogan'] = item.value
             elif item.key == 'page_title':
                 sitedata['page_title'] = item.value
+            elif item.key == 'login_redirect':
+                sitedata['login_redirect'] = item.value
             elif item.key == 'copyrights':
                 sitedata['copyrights'] = item.value
 
-        config = form.RegisterSiteConfigForm(site_name=sitedata['site_name'], site_slogan=sitedata['site_slogan'],
-                                             page_title=sitedata['page_title'], copyrights=sitedata['copyrights'])
+        config = form.RegisterSiteConfigForm()
 
         if config.validate_on_submit():
             uploaded_file = config.site_logo.data
@@ -188,12 +314,19 @@ def create_app():
             dbconn.query(db.Configs).filter(db.Configs.key == 'site_name').update({'value': config.site_name.data})
             dbconn.query(db.Configs).filter(db.Configs.key == 'site_slogan').update({'value': config.site_slogan.data})
             dbconn.query(db.Configs).filter(db.Configs.key == 'page_title').update({'value': config.page_title.data})
+            dbconn.query(db.Configs).filter(db.Configs.key == 'login_redirect').update({'value': config.login_redirect.data})
             dbconn.query(db.Configs).filter(db.Configs.key == 'copyrights').update({'value': config.copyrights.data})
 
             dbconn.commit()
 
             flash('Configuration updated successfully.', 'success')
             return redirect(url_for('site_config'))
+
+        config.site_name.data = sitedata['site_name']
+        config.site_slogan.data = sitedata['site_slogan']
+        config.page_title.data = sitedata['page_title']
+        config.login_redirect.data = sitedata['login_redirect']
+        config.copyrights.data = sitedata['copyrights']
 
         metadata = {
             'info': {
@@ -286,7 +419,6 @@ def create_app():
         return render_template('filemanger.html', metadata=[], files=files, action=action, pid=pid)
 
     @app.route('/plugins-cache-recreate', methods=['GET', 'POST'])
-    @admin_login_required
     @authorize
     def plugins_cache_recreate():
         global plugins_context_rebuild
@@ -294,30 +426,33 @@ def create_app():
         return redirect(url_for('reauth', token=securetoken()))
 
     @app.route('/plugin-activation/<string:status>/<int:pid>')
-    @admin_login_required
     @authorize
     def plugin_activation(status, pid):
-        try:
-            pstatus = {'installed': 1, 'uninstalled': 2, 'pending': 0}
-            dbconn = db.get_db()
-            plugin = dbconn.query(db.Plugins).filter(db.Plugins.id == pid)
-            if status == 'delete':
-                plugin_details = plugin.first()
-                if plugin_details.plugin_path == 'system':
-                    user_folder = os.path.join(app.config['PLUGIN_UPLOAD_FOLDER'], session['username'])
-                    shutil.rmtree(os.path.join(user_folder, plugin_details.name), ignore_errors=True)
-                flash('Plugin deleted successfully.', 'success')
-                plugin.delete(synchronize_session=False)
-            else:
-                flash('Plugin updated successfully.', 'success')
-                plugin.update({'status': pstatus[status]})
+        dbconn = db.get_db()
+        plugin = dbconn.query(db.Plugins).filter(db.Plugins.id == pid)
+        plugin_check = plugin.first()
 
-            dbconn.commit()
-            global plugins_context_rebuild
-            plugins_context_rebuild = True
+        if session['role'] == 'admin':
+            pass
+        elif plugin_check.author_id != session['user_id']:
+            flash('Permission Denied', 'error')
+            return redirect(url_for('plugins'))
 
-        except:
-            flash('Permission denied.', 'error')
+        pstatus = {'installed': 1, 'uninstalled': 2, 'pending': 0}
+        if status == 'delete':
+            plugin_details = plugin.first()
+            if plugin_details.plugin_path == 'system':
+                user_folder = os.path.join(app.config['PLUGIN_UPLOAD_FOLDER'], session['username'])
+                shutil.rmtree(os.path.join(user_folder, plugin_details.name), ignore_errors=True)
+            flash('Plugin deleted successfully.', 'success')
+            plugin.delete(synchronize_session=False)
+        else:
+            flash('Plugin updated successfully.', 'success')
+            plugin.update({'status': pstatus[status]})
+
+        dbconn.commit()
+        global plugins_context_rebuild
+        plugins_context_rebuild = True
 
         return redirect(url_for('plugins', token=securetoken()))
 
@@ -387,7 +522,7 @@ def create_app():
         metadata = {
             'info': {
                 'title': 'Create User',
-                'class': 'col-md-5',
+                'class': 'col-md-3',
                 'body_class': None,
                 'type': None
             },
@@ -403,7 +538,6 @@ def create_app():
         return render_template('create_user.html', metadata=metadata, plugins=user_plugins)
 
     @app.route('/list-users')
-    @admin_login_required
     @authorize
     def list_users():
         dbconn = db.get_db()
@@ -423,8 +557,9 @@ def create_app():
                 session['password'] = getuser.password
                 session['role'] = getuser.role
                 session['status'] = getuser.status
+                redirection = dbconn.query(db.Configs).filter(db.Configs.key == 'login_redirect').first()
 
-                return redirect(url_for('home'))
+                return redirect(redirection.value)
 
             else:
                 flash('Login failed. Please try again.', 'error')
@@ -485,9 +620,15 @@ def create_app():
     @authorize
     def form_builder(action=None, fid=None, child_action=None, cid=None):
         dbconn = db.get_db()
+        if fid:
+            check_item = dbconn.query(db.Form_reference).filter((db.Form_reference.id == fid) & (db.Form_reference.author_id == session['user_id'])).first()
+            if check_item is None:
+                flash('Permission denied.', 'error')
+                return redirect(url_for('form_builder'))
+
         if action == 'open':
             if fid:
-                field_reff = dbconn.query(db.Form_reference).filter(db.Form_reference.id == fid and db.db.Form_reference.author_id == session['user_id']).first()
+                field_reff = dbconn.query(db.Form_reference).filter((db.Form_reference.id == fid) & (db.Form_reference.author_id == session['user_id'])).first()
                 if field_reff:
                     if child_action == 'delete' and cid:
                         child_field = dbconn.query(db.Form_reference_fields).get(cid)
@@ -571,7 +712,7 @@ def create_app():
 
         elif action == 'edit':
             if fid:
-                field_reff_conn = dbconn.query(db.Form_reference).filter(db.Form_reference.id == fid and db.Form_reference.author_id == session['user_id'])
+                field_reff_conn = dbconn.query(db.Form_reference).filter((db.Form_reference.id == fid) & (db.Form_reference.author_id == session['user_id']))
                 field_reff = field_reff_conn.first()
 
                 if field_reff is None:
@@ -618,7 +759,7 @@ def create_app():
 
         else:
             formbuilder = form.FormBuilder()
-            collections = dbconn.query(db.Form_reference).all()
+            collections = dbconn.query(db.Form_reference).filter(db.Form_reference.author_id == session['user_id']).all()
             if formbuilder.validate_on_submit():
                 field_reff = db.Form_reference(author_id=session['user_id'], name=formbuilder.name.data, callback=formbuilder.callback.data, method=formbuilder.method.data, enctype=formbuilder.enctype.data)
                 dbconn.add(field_reff)
@@ -748,6 +889,8 @@ def create_app():
                 site_context['site_slogan'] = item.value
             elif item.key == 'page_title':
                 site_context['page_title'] = item.value
+            elif item.key == 'login_redirect':
+                site_context['login_redirect'] = item.value
             elif item.key == 'copyrights':
                 site_context['copyrights'] = item.value
             elif item.key == 'available_version':
@@ -755,7 +898,8 @@ def create_app():
             elif item.key == 'available_version_check_date':
                 site_context['available_version_check_date'] = item.value
 
-        if 'username' in session:
+        if 'user_id' in session:
+            site_context['user_id'] = session['user_id']
             site_context['username'] = session['username']
             site_context['role'] = session['role']
             site_context['status'] = session['status']
@@ -770,6 +914,7 @@ def create_app():
         site_context['version'] = app.config['VERSION']
         site_context['available_version'] = site_context['available_version']
         site_context['build'] = form_builder
+        site_context['sidebar_menus'] = dbconn.query(db.Menus).order_by(db.Menus.weight).all()
 
         return site_context
 

@@ -20,3 +20,5 @@ label[for="csrf_token"]{display:none;}
 .form-group.has-error .help-block {color: #dd4b39;}
 #form_field_reff_fields .CodeMirror{height:300px; border:1px solid #ccc;}
 #form_edit_file .CodeMirror{height:100% !important; border:1px solid #ccc;}
+#form_menu_builder ul.form-control{padding:0px; height:auto; list-style-type:none; border:none;}
+#form_menu_builder ul.form-control li{border: 1px solid #ccc; padding: 10px; border-radius: 5px; margin-bottom:10px;}

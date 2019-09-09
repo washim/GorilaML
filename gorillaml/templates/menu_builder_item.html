@@ -1,0 +1,34 @@
+<table class="table table-striped">
+    <tbody>
+        <tr>
+            <th style="width: 10px">ID</th>
+            <th>Icon</th>
+            <th>Title</th>
+            <th>Main Menu</th>
+            <th>Path</th>
+            <th>Weight</th>
+            <th>Login Required</th>
+            <th>By</th>
+            <th>Action</th>
+        </tr>
+        {% if menus.menu_items|length > 0 %}
+        {% for row in menus.menu_items %}
+        <tr>
+            <td>{{ row.id }}</td>
+            <td><i class="{{ row.icon }}"></i></td>
+            <td>{{ row.title }}</td>
+            <td>{{ row.menu_items.title }}</td>
+            <td>{{ row.path }}</td>
+            <td>{{ row.weight }}</td>
+            <td>{{ row.login_required }}</td>
+            <td>{{ row.menu_items.user.username }}</td>
+            <td><a href="{{ url_for('menu_builder', action='open', mid=row.menu_items.id, caction='edit', id=row.id) }}" title="Edit Menu"><i class="fas fa-edit"></i></a> <a href="{{ url_for('menu_builder', action='open', mid=row.menu_items.id, caction='delete', id=row.id) }}" title="Delete Menu"><i class="fas fa-trash"></i></a></td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="8" align="center">No menus found yet.</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>

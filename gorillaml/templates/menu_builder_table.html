@@ -1,0 +1,30 @@
+<table class="table table-striped">
+    <tbody>
+        <tr>
+            <th style="width: 10px">ID</th>
+            <th>Icon</th>
+            <th>Title</th>
+            <th>Weight</th>
+            <th>Login Required</th>
+            <th>By</th>
+            <th>Action</th>
+        </tr>
+        {% if menus|length > 0 %}
+        {% for row in menus %}
+        <tr>
+            <td>{{ row.id }}</td>
+            <td><i class="{{ row.icon }}"></i></td>
+            <td>{{ row.title }}</td>
+            <td>{{ row.weight }}</td>
+            <td>{{ row.login_required }}</td>
+            <td>{{ row.user.username }}</td>
+            <td><a href="{{ url_for('menu_builder', action='open', mid=row.id) }}" title="View Menu items"><i class="fas fa-eye"></i></a> <a href="{{ url_for('menu_builder', action='edit', mid=row.id) }}" title="Edit Menu"><i class="fas fa-edit"></i></a> <a href="{{ url_for('menu_builder', action='delete', mid=row.id) }}" title="Delete Menu"><i class="fas fa-trash"></i></a></td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="6" align="center">No menus found yet.</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>

@@ -3,7 +3,7 @@ import shutil
 from werkzeug.utils import secure_filename
 from zipfile import ZipFile
 from flask import current_app, session
-from wtforms import StringField, PasswordField, SelectField, TextAreaField, SubmitField, validators, ValidationError
+from wtforms import StringField, PasswordField, SelectField, TextAreaField, SubmitField, HiddenField, validators, ValidationError
 from wtforms.widgets import PasswordInput
 from flask_wtf import FlaskForm, file
 from flask_wtf.csrf import CSRFProtect
@@ -67,7 +67,7 @@ class CreateUserForm(FlaskForm):
                                               validators.EqualTo('confirm', message='Passwords must match')],
                              widget=PasswordInput(hide_value=False))
     confirm = PasswordField('Repeat Password', [validators.DataRequired()], widget=PasswordInput(hide_value=False))
-    role = SelectField('User role', choices=[('developer', 'Developer'), ('admin', 'Administrator')])
+    role = SelectField('User role', choices=[('developer', 'Developer'), ('presenter', 'Presenter'), ('admin', 'Administrator')])
     status = SelectField('Status', choices=[('enabled', 'Enable'), ('disabled', 'Disable')])
     submit = SubmitField('Save')
 
@@ -77,7 +77,8 @@ class RegisterSiteConfigForm(FlaskForm):
     site_slogan = StringField('Site slogan', [validators.DataRequired()])
     site_logo = file.FileField('Site logo', [file.FileAllowed(['png', 'jpeg', 'jpg', 'gif'])])
     page_title = StringField('Page title', [validators.DataRequired()])
-    copyrights = SelectField('Copyrights footer', choices=[('yes', 'Enabled'), ('no', 'Disabled')])
+    login_redirect = StringField('Login redirect', [validators.DataRequired()])
+    copyrights = StringField('Copyrights footer')
     submit = SubmitField('Save')
 
 class FormBuilder(FlaskForm):
@@ -112,4 +113,21 @@ class FormBuilderFields(FlaskForm):
 
 class FileManager(FlaskForm):
     content = TextAreaField('Content', [validators.DataRequired()])
+    submit = SubmitField('Save')
+
+
+class MenuBuilderItem(FlaskForm):
+    icon = StringField('Fontawesome Icon', [validators.DataRequired()])
+    title = StringField('Title', [validators.DataRequired()])
+    path = StringField('Path', [validators.DataRequired()])
+    weight = SelectField('Weight', choices=[(item, item) for item in range(-100, 100, 1)], coerce=int, default=0)
+    login_required = SelectField('Login Required', choices=[('yes', 'Yes'), ('no', 'No')])
+    submit = SubmitField('Save')
+
+
+class MenuBuilder(FlaskForm):
+    icon = StringField('Fontawesome Icon', [validators.DataRequired()])
+    title = StringField('Menu title', [validators.DataRequired()])
+    weight = SelectField('Weight', choices=[(item, item) for item in range(-100, 100, 1)], coerce=int, default=0)
+    login_required = SelectField('Login Required', choices=[('yes', 'Yes'), ('no', 'No')])
     submit = SubmitField('Save')
