@@ -90,3 +90,4 @@ def check_new_version():
     soup = BeautifulSoup(pypi.text, 'html.parser')
     dbconn.query(db.Configs).filter(db.Configs.key == 'available_version').update({'value': soup.h1.string.split(' ')[1]})
     dbconn.query(db.Configs).filter(db.Configs.key == 'available_version_check_date').update({'value': datetime.today()})
+    dbconn.commit()

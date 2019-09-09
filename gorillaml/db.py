@@ -149,6 +149,7 @@ def init_db():
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
+    app.cli.add_command(db_update)
 
 
 @click.command('init-db')
@@ -156,3 +157,24 @@ def init_app(app):
 def init_db_command():
     init_db()
     click.echo('Initialized the database.')
+
+
+@click.command('db-update')
+@with_appcontext
+def db_update():
+    dbconn = get_db()
+    sql_cmd = {}
+
+    if len(sql_cmd) > 0:
+        for ttl, cmd in sql_cmd.items():
+            try:
+                dbconn.execute(cmd)
+                click.echo(ttl + ': success')
+
+            except Exception:
+                click.echo(ttl + ': not required')
+
+    dbconn.query(Configs).filter(Configs.key == 'available_version').update({'value': current_app.config['VERSION']})
+    dbconn.commit()
+
+    click.echo('Database updation completed')

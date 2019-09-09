@@ -34,7 +34,7 @@ def create_app():
     app.config.from_mapping(
         SECRET_KEY=os.urandom(12),
         PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons'),
-        VERSION='0.1.3'
+        VERSION='0.1.4'
     )
 
     CORS(app)
