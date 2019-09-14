@@ -5,7 +5,7 @@ with open('README.rst') as f:
 
 setup(
     name='gorillaml',
-    version='0.1.4',
+    version='0.1.7',
     packages=['gorillaml'],
     license='MIT license',
     url="https://www.gorillaml.com",
@@ -33,7 +33,8 @@ setup(
         'scipy',
         'pandas',
         'matplotlib',
-        'PyQt5<5.13'
+        'PyQt5<5.13',
+        'pyqtwebengine<5.13'
     ],
     entry_points={
         'console_scripts': [

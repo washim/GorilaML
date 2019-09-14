@@ -7,7 +7,6 @@ import threading
 import platform
 from ast import literal_eval
 from datetime import datetime
-from PyQt5 import QtWidgets
 from werkzeug.utils import secure_filename
 from werkzeug.serving import run_simple
 from flask_wtf import FlaskForm
@@ -15,7 +14,6 @@ from flask_cors import CORS
 from flask.cli import FlaskGroup
 from gorillaml import db
 from gorillaml import form
-from gorillaml.widget import Ui_MainWindow
 from gorillaml.lab import (
     authorize, admin_login_required, securetoken, check_new_version
 )
@@ -34,7 +32,7 @@ def create_app():
     app.config.from_mapping(
         SECRET_KEY=os.urandom(12),
         PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons'),
-        VERSION='0.1.4'
+        VERSION='0.1.7'
     )
 
     CORS(app)
@@ -213,7 +211,7 @@ def create_app():
         metadata = {
             'info': {
                 'title': 'Upload your plugin',
-                'class': 'col-md-12',
+                'class': 'col-md-4',
                 'body_class': None,
                 'type': None
             },
@@ -259,7 +257,7 @@ def create_app():
         metadata = {
             'info': {
                 'title': 'Register your plugin from your local machine',
-                'class': 'col-md-12',
+                'class': 'col-md-4',
                 'body_class': None,
                 'type': None
             },
@@ -331,7 +329,7 @@ def create_app():
         metadata = {
             'info': {
                 'title': 'Site Configurations',
-                'class': 'col-md-12',
+                'class': 'col-md-4',
                 'body_class': None,
                 'type': None
             },
@@ -954,6 +952,8 @@ def start_server():
 
 @click.command('gui')
 def gui():
+    from gorillaml.widget import Ui_MainWindow
+    from PyQt5 import QtWidgets
     application = AppReloader(create_app)
     threading.Thread(target=run_simple, args=('localhost', 5000, application, False, True), daemon=True).start()
     app = QtWidgets.QApplication(sys.argv)
