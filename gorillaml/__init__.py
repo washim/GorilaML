@@ -32,7 +32,7 @@ def create_app():
     app.config.from_mapping(
         SECRET_KEY=os.urandom(12),
         PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons'),
-        VERSION='0.1.7'
+        VERSION='0.1.9'
     )
 
     CORS(app)
@@ -872,6 +872,9 @@ def create_app():
                         setattr(FormBuilderForm, field.name, PasswordField(field.title, [validators.DataRequired()]))
 
             dform = FormBuilderForm()
+            if dform.validate_on_submit():
+                pass
+
             return dict(info=fields, elements=dform, count=record_count)
 
         dbconn = db.get_db()

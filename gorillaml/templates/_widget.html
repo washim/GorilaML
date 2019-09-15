@@ -60,21 +60,17 @@
             {% if form.count > 0 %}
             <form id="form_id_{{ form.info.id }}" role="form" {% if form.info.enctype %}enctype="{{ form.info.enctype }}" {% endif %}method="{{ form.info.method }}" action="{{ url_for(form.info.callback) }}">
                 {{ form.csrf_token }}
-                <table cellpadding="5">
-                    {% for field in form.elements %}
-                        {% if field.type != 'SubmitField' %}
-                        <tr>
-                            <td>{{ field.label }} {% if field.flags.required %}<span class="text-danger">*</span>{% endif %}</td>
-                            <td>{{ field(class_="form-control") }}</td>
-                            <td>
-                                {% for message in field.errors %}
-                                    <div class="text-danger">{{ message }}</div>
-                                {% endfor %}
-                            </td>
-                        </tr>
-                        {% endif %}
+                {% for field in form.elements %}
+                    {% if field.type != 'SubmitField' %}
+                    <div class="form-group {{field.name}} {% if field.errors %} has-error{% endif %}">
+                    {{ field.label }} {% if field.flags.required %}<span class="text-danger">*</span>{% endif %}
+                    {{ field(class_="form-control") }}
+                    {% for message in field.errors %}
+                        <div class="text-danger">{{ message }}</div>
                     {% endfor %}
-                </table>
+                    </div>
+                    {% endif %}
+                {% endfor %}
             </form>
             {% else %}
             Field does not exist.
