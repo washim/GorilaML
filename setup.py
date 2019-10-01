@@ -1,11 +1,12 @@
 from setuptools import setup
+from gorillaml import __version__
 
 with open('README.rst') as f:
     long_description = f.read()
 
 setup(
     name='gorillaml',
-    version='0.1.9',
+    version=__version__,
     packages=['gorillaml'],
     license='MIT license',
     url="https://www.gorillaml.com",
@@ -32,7 +33,9 @@ setup(
         'mpld3',
         'scipy',
         'pandas',
+        'numpy',
         'matplotlib',
+        'bokeh',
         'PyQt5<5.13',
         'pyqtwebengine<5.13'
     ],

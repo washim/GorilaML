@@ -22,7 +22,18 @@
             <td>{{ row.weight }}</td>
             <td>{{ row.login_required }}</td>
             <td>{{ row.menu_items.user.username }}</td>
-            <td><a href="{{ url_for('menu_builder', action='open', mid=row.menu_items.id, caction='edit', id=row.id) }}" title="Edit Menu"><i class="fas fa-edit"></i></a> <a href="{{ url_for('menu_builder', action='open', mid=row.menu_items.id, caction='delete', id=row.id) }}" title="Delete Menu"><i class="fas fa-trash"></i></a></td>
+            <td>
+                <nav>
+                    <ul class="pagination pagination-sm">
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('menu_builder', action='open', mid=row.menu_items.id, caction='edit', id=row.id) }}" title="Edit Menu"><i class="fas fa-edit"></i></a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('menu_builder', action='open', mid=row.menu_items.id, caction='delete', id=row.id) }}" title="Delete Menu"><i class="fas fa-trash"></i></a>
+                        </li>
+                    </ul>
+                </nav>
+            </td>
         </tr>
         {% endfor %}
         {% else %}

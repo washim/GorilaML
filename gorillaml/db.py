@@ -57,6 +57,7 @@ class Menus(Base):
     title = Column('title', String, nullable=False)
     weight = Column('weight', Integer, nullable=False)
     login_required = Column('login_required', String, nullable=False)
+    created = Column('created', Date, nullable=False, default=datetime.now)
     user = relationship('Users', back_populates='menus')
     menu_items = relationship('Menu_items', back_populates='menu_items', order_by='Menu_items.weight', cascade='save-update, merge, delete')
 
@@ -87,6 +88,7 @@ class Form_reference(Base):
     callback = Column('callback', String, nullable=False)
     method = Column('method', String, nullable=False)
     enctype = Column('enctype', String, nullable=True)
+    created = Column('created', Date, nullable=False, default=datetime.now)
     user = relationship('Users', back_populates='form_reference')
     form_reference_fields = relationship('Form_reference_fields', back_populates='form_references', order_by='Form_reference_fields.weight', cascade='save-update, merge, delete')
 

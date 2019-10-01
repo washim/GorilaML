@@ -16,12 +16,26 @@
             <td>{{ user.role }}</td>
             <td>{% if user.status == 'enabled' %}<span class="badge bg-success">Enabled</span>{% else %}<span class="badge bg-danger">Disabled</span>{% endif %}</td>
             <td>{{ user.created }}</td>
-            {% if role == 'admin' %}<td>{% if user.status == 'disabled' %}<a href="{{ url_for('user_activation', status='enabled', uid=user.id) }}" title="Enable this user"><i class="fas fa-thumbs-up"></i></a> {% else %}<a href="{{ url_for('user_activation', status='disabled', uid=user.id) }}" title="Disable this user"><i class="fas fa-thumbs-down"></i></a>{% endif %}</td>{% endif %}
+            <td>
+                {% if role == 'admin' %}
+                <nav>
+                  <ul class="pagination pagination-sm">
+                      <li class="page-item">
+                          {% if user.status == 'disabled' %}
+                          <a class="page-link" href="{{ url_for('user_activation', status='enabled', uid=user.id) }}" title="Enable this user"><i class="fas fa-thumbs-up"></i></a>
+                          {% else %}
+                          <a class="page-link" href="{{ url_for('user_activation', status='disabled', uid=user.id) }}" title="Disable this user"><i class="fas fa-thumbs-down"></i></a>
+                          {% endif %}
+                      </li>
+                  </ul>
+                </nav>
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
         {% else %}
         <tr>
-            <td colspan="{% if role == 'admin' %}6{% else %}5{% endif %}" align="center">No users found yet.</td>
+            <td colspan="6" align="center">No users found yet.</td>
         </tr>
         {% endif %}
     </tbody>

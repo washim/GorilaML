@@ -25,6 +25,7 @@ from wtforms import (
     SelectMultipleField, TextAreaField, BooleanField, FileField, SubmitField, validators
 )
 
+__version__ = "0.2.0"
 plugins_context_rebuild = False
 
 def create_app():
@@ -32,7 +33,7 @@ def create_app():
     app.config.from_mapping(
         SECRET_KEY=os.urandom(12),
         PLUGIN_UPLOAD_FOLDER=os.path.join(app.instance_path, 'addons'),
-        VERSION='0.1.9'
+        VERSION=__version__
     )
 
     CORS(app)
@@ -56,8 +57,10 @@ def create_app():
         dbconn = db.get_db()
         users = dbconn.query(db.Users).all()
         plugins = dbconn.query(db.Plugins).all()
+        custom_forms = dbconn.query(db.Form_reference).all()
+        custom_menus = dbconn.query(db.Menus).all()
 
-        return render_template('home.html', users=users, plugins=plugins)
+        return render_template('home.html', users=users, plugins=plugins, custom_forms=custom_forms, custom_menus=custom_menus)
 
     @app.route('/menu-builder/<string:action>/<int:mid>/<string:caction>/<int:id>', methods=['GET', 'POST'])
     @app.route('/menu-builder/<string:action>/<int:mid>', methods=['GET', 'POST'])
@@ -211,7 +214,7 @@ def create_app():
         metadata = {
             'info': {
                 'title': 'Upload your plugin',
-                'class': 'col-md-4',
+                'class': 'col-md-6',
                 'body_class': None,
                 'type': None
             },
@@ -257,7 +260,7 @@ def create_app():
         metadata = {
             'info': {
                 'title': 'Register your plugin from your local machine',
-                'class': 'col-md-4',
+                'class': 'col-md-6',
                 'body_class': None,
                 'type': None
             },
@@ -329,7 +332,7 @@ def create_app():
         metadata = {
             'info': {
                 'title': 'Site Configurations',
-                'class': 'col-md-4',
+                'class': 'col-md-6',
                 'body_class': None,
                 'type': None
             },
@@ -912,8 +915,7 @@ def create_app():
         if duration.days > 5:
             check_new_version()
 
-        site_context['version'] = app.config['VERSION']
-        site_context['available_version'] = site_context['available_version']
+        site_context['version'] = __version__
         site_context['build'] = form_builder
         site_context['sidebar_menus'] = dbconn.query(db.Menus).order_by(db.Menus.weight).all()
 
